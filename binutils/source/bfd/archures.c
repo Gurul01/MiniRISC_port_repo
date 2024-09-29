@@ -578,6 +578,8 @@ DESCRIPTION
 .#define bfd_mach_amdgcn_gfx1100 0x041
 .#define bfd_mach_amdgcn_gfx1101 0x046
 .#define bfd_mach_amdgcn_gfx1102 0x047
+.  bfd_arch_minirisc,       {* MiniRISC arch *}
+.#define bfd_mach_minirisc       1
 .  bfd_arch_last
 .  };
 */
@@ -714,6 +716,7 @@ extern const bfd_arch_info_type bfd_xtensa_arch;
 extern const bfd_arch_info_type bfd_xgate_arch;
 extern const bfd_arch_info_type bfd_z80_arch;
 extern const bfd_arch_info_type bfd_z8k_arch;
+extern const bfd_arch_info_type bfd_minirisc_arch;
 
 static const bfd_arch_info_type * const bfd_archures_list[] =
   {
@@ -801,6 +804,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_xgate_arch,
     &bfd_z80_arch,
     &bfd_z8k_arch,
+    &bfd_minirisc_arch,
 #endif
   0
 };

@@ -950,6 +950,7 @@ extern const bfd_target xtensa_elf32_le_vec;
 extern const bfd_target z80_coff_vec;
 extern const bfd_target z80_elf32_vec;
 extern const bfd_target z8k_coff_vec;
+extern const bfd_target minirisc_elf32_vec;
 
 /* These are always included.  */
 extern const bfd_target srec_vec;
@@ -1045,6 +1046,8 @@ static const bfd_target * const _bfd_target_vector[] =
 
 	&bfin_elf32_vec,
 	&bfin_elf32_fdpic_vec,
+
+	&minirisc_elf32_vec,
 
 	&cr16_elf32_vec,
 

@@ -225,6 +225,7 @@ x86_64*)	 targ_archs=bfd_i386_arch ;;
 xtensa*)	 targ_archs=bfd_xtensa_arch ;;
 z80*|r800|z180|gbz80|ez80*)	 targ_archs=bfd_z80_arch ;;
 z8k*)		 targ_archs=bfd_z8k_arch ;;
+minirisc*)		 targ_archs=bfd_minirisc_arch ;;
 *)		 targ_archs=bfd_${targ_cpu}_arch ;;
 esac
 
@@ -459,6 +460,11 @@ case "${targ}" in
     targ_defvec=tic54x_coff1_vec
     targ_selvecs="tic54x_coff1_beh_vec tic54x_coff2_vec tic54x_coff2_beh_vec tic54x_coff0_vec tic54x_coff0_beh_vec"
     targ_underscore=yes
+    ;;
+
+  minirisc-*-linux*)
+    targ_defvec=minirisc_elf32_vec
+    targ_selvecs=minirisc_elf32_vec
     ;;
 
   cr16-*-elf* | cr16*-*-uclinux*)
