@@ -23,6 +23,13 @@ const pseudo_typeS md_pseudo_table[] =
   { (char*)0, (void(*)(int))0, 0 }
 };
 
+//TODO:
+typedef struct reg_type{
+    char name[4];
+    uint8_t number;
+} reg_type;
+reg_type reg_array[16];
+
 htab_t reg_table; //struct hash_control *reg_table;
 
 int md_parse_option(int c, const char *arg)
@@ -50,7 +57,7 @@ static int eq_func (const void *entry1, const void *entry2)
 /*************************************************************/
 static int minirisc_parse_register(const char *name, expressionS *resultP)
 {
-    // symbolS *reg_sym = bfd_hash_lookup(reg_table, name, false, true); //hash_find
+    // symbolS *reg_sym = hash_find(reg_table, name); //bfd_hash_lookup
 
     // if(reg_sym != 0)
     // {
@@ -60,16 +67,28 @@ static int minirisc_parse_register(const char *name, expressionS *resultP)
     // }
 
     // Lookup in the hash table
-    void **slot = htab_find_slot (reg_table, name, NO_INSERT);
-    if (slot && *slot != NULL)
+    // void **slot = htab_find_slot (reg_table, name, NO_INSERT);
+    // if (slot && *slot != NULL)
+    // {
+    //     symbolS *reg_sym = (symbolS *) *slot;
+
+    //     resultP->X_op = O_register;
+    //     resultP->X_add_number = S_GET_VALUE(reg_sym);
+
+    //     printf("Reached_parse_reg: %s\n", name);
+    //     return 1;
+    // }
+
+    for(int i = 0; i < MINIRISC_NUM_REGISTERS; i++)
     {
-        symbolS *reg_sym = (symbolS *) *slot;
+        if(0 == strcmp(name, reg_array[i].name))
+        {
+            resultP->X_op = O_register;
+            resultP->X_add_number = reg_array[i].number;
 
-        resultP->X_op = O_register;
-        resultP->X_add_number = S_GET_VALUE (reg_sym);
-
-        printf("Reached_parse_reg: %s\n", name);
-        return 1;
+            printf("Reached_parse_reg: %s\n", name);
+            return 1;
+        }
     }
 
     return 0;
@@ -125,8 +144,8 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
 {
     operatorT opcode;
 
-    expressionS first_operand;
-    expressionS second_operand;
+    expressionS *first_operand;
+    expressionS *second_operand;
    
     gas_assert(name != 0 && resultP != 0);
 
@@ -330,28 +349,30 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
         case OR:
         case XOR:
         case TST:
-            //(void) restore_line_pointer(*next_char);
-            input_line_pointer = next_char;
+            (void) restore_line_pointer(*next_char);
+            //input_line_pointer = next_char;
 
             SKIP_ALL_WHITESPACE();
-            memset(&first_operand, 0, sizeof(expressionS));
-            expression(&first_operand);
-            resultP->X_add_symbol = make_expr_symbol(&first_operand);
+            first_operand = (expressionS*)malloc(sizeof(expressionS));
+            memset(first_operand, 0, sizeof(expressionS));
+            expression(first_operand);
+            resultP->X_add_symbol = make_expr_symbol(first_operand);
 
             SKIP_ALL_WHITESPACE();
-            memset(&second_operand, 0, sizeof(expressionS));
-            expression(&second_operand);
-            resultP->X_op_symbol = make_expr_symbol(&second_operand);
+            second_operand = (expressionS*)malloc(sizeof(expressionS));
+            memset(second_operand, 0, sizeof(expressionS));
+            expression(second_operand);
+            resultP->X_op_symbol = make_expr_symbol(second_operand);
 
             // Dummy
             resultP->X_add_number = 1;
 
-            while(*input_line_pointer != '\n')
-            {
-                input_line_pointer++;
-            }
-            input_line_pointer++;
-            next_char = input_line_pointer; //*next_char = *input_line_pointer;
+            // while(*input_line_pointer != '\n')
+            // {
+            //     input_line_pointer++;
+            // }
+            // input_line_pointer++;
+            *next_char = *input_line_pointer; //next_char = input_line_pointer;
             break;
 
         // The instructions with one operand
@@ -381,24 +402,25 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
         case JSE:
         case JG: 
         case JSR:
-            //(void) restore_line_pointer(*next_char);
-            input_line_pointer = next_char;
+            (void) restore_line_pointer(*next_char);
+            //input_line_pointer = next_char;
 
             SKIP_ALL_WHITESPACE();
-            memset(&first_operand, 0, sizeof(expressionS));
-            expression(&first_operand);
-            resultP->X_add_symbol = make_expr_symbol(&first_operand);
+            first_operand = (expressionS*)malloc(sizeof(expressionS));
+            memset(first_operand, 0, sizeof(expressionS));
+            expression(first_operand);
+            resultP->X_add_symbol = make_expr_symbol(first_operand);
 
             // Dummy
             //resultP->X_op_symbol  = 0;
             resultP->X_add_number = 1;
 
-            while(*input_line_pointer != '\n')
-            {
-                input_line_pointer++;
-            }   
-            input_line_pointer++;
-            next_char = input_line_pointer; //*next_char = *input_line_pointer;
+            // while(*input_line_pointer != '\n')
+            // {
+            //     input_line_pointer++;
+            // }   
+            // input_line_pointer++;
+            *next_char = *input_line_pointer; //next_char = input_line_pointer;
             break;
 
         // The instructions with zero operands
@@ -483,20 +505,23 @@ void md_begin(void)
 
     for (i = 0; i < MINIRISC_NUM_REGISTERS; i++)
     {
-        char name[4];
-        sprintf(name, "r%d", i);
+        // char name[4];
+        // sprintf(name, "r%d", i);
 
-        // Create a new symbol for each register
-        symbolS *reg_sym = symbol_new (name, reg_section, &zero_address_frag, i);
+        // // Create a new symbol for each register
+        // symbolS *reg_sym = symbol_new (name, reg_section, &zero_address_frag, i);
 
-        // Insert the symbol into the hash table
-        void **slot = htab_find_slot (reg_table, S_GET_NAME (reg_sym), INSERT);
-        if (slot == NULL || *slot != NULL)
-        {
-            as_fatal (_("failed to create register symbols"));
-        }
+        // // Insert the symbol into the hash table
+        // void **slot = htab_find_slot (reg_table, S_GET_NAME(reg_sym), INSERT);
+        // if (slot == NULL || *slot != NULL)
+        // {
+        //     as_fatal (_("failed to create register symbols"));
+        // }
 
-        *slot = (void *)reg_sym;
+        // *slot = (void *)reg_sym;
+
+        reg_array[i].number = i;
+        sprintf(reg_array[i].name, "r%d", i);
     }
 }
 
