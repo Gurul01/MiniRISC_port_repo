@@ -1,6 +1,9 @@
 {
     "files.associations": {
         "functional": "c",
-        "bfd.h": "c"
+        "bfd.h": "c",
+        "minirisc.h": "c",
+        "atomic": "c",
+        "cstdint": "c"
     }
 }

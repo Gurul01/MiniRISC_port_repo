@@ -42,6 +42,9 @@
 #define ARCH_avr
 #define ARCH_bfin
 #define ARCH_cr16
+
+#define ARCH_minirisc
+
 #define ARCH_cris
 #define ARCH_crx
 #define ARCH_csky
@@ -159,6 +162,13 @@ disassembler (enum bfd_architecture a,
       disassemble = print_insn_cr16;
       break;
 #endif
+
+#ifdef ARCH_minirisc
+    case bfd_arch_minirisc:
+      disassemble = print_insn_minirisc;
+      break;
+#endif
+
 #ifdef ARCH_cris
     case bfd_arch_cris:
       disassemble = cris_get_disassembler (abfd);

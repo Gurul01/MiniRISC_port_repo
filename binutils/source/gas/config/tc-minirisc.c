@@ -631,15 +631,15 @@ void md_assemble(char *insn_str)
 
             break;
 
-        case SL0: if(whole_instr->X_op == SL0) { ctrl_field = 0b0000; }
-        case SL1: if(whole_instr->X_op == SL1) { ctrl_field = 0b0100; }
-        case SR0: if(whole_instr->X_op == SR0) { ctrl_field = 0b0001; }
-        case SR1: if(whole_instr->X_op == SR1) { ctrl_field = 0b0101; }
-        case ASR: if(whole_instr->X_op == ASR) { ctrl_field = 0b1001; }
-        case ROL: if(whole_instr->X_op == ROL) { ctrl_field = 0b0010; }
-        case ROR: if(whole_instr->X_op == ROR) { ctrl_field = 0b0011; }
-        case RLC: if(whole_instr->X_op == RLC) { ctrl_field = 0b0110; }
-        case RRC: if(whole_instr->X_op == RRC) { ctrl_field = 0b0111; }
+        case SL0: if(whole_instr->X_op == SL0) { ctrl_field = SL0_CTRL; }
+        case SL1: if(whole_instr->X_op == SL1) { ctrl_field = SL1_CTRL; }
+        case SR0: if(whole_instr->X_op == SR0) { ctrl_field = SR0_CTRL; }
+        case SR1: if(whole_instr->X_op == SR1) { ctrl_field = SR1_CTRL; }
+        case ASR: if(whole_instr->X_op == ASR) { ctrl_field = ASR_CTRL; }
+        case ROL: if(whole_instr->X_op == ROL) { ctrl_field = ROL_CTRL; }
+        case ROR: if(whole_instr->X_op == ROR) { ctrl_field = ROR_CTRL; }
+        case RLC: if(whole_instr->X_op == RLC) { ctrl_field = RLC_CTRL; }
+        case RRC: if(whole_instr->X_op == RRC) { ctrl_field = RRC_CTRL; }
             gas_assert(whole_instr->X_add_symbol != 0);
 
             first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
@@ -660,22 +660,22 @@ void md_assemble(char *insn_str)
             break;
 
     /* Either a reg or an imm --------------------------------------------------------*/
-        case JMP: if(whole_instr->X_op == JMP) { ctrl_field = 0b0000; }
-        case JZ:  if(whole_instr->X_op == JZ)  { ctrl_field = 0b0001; }
-        case JNZ: if(whole_instr->X_op == JNZ) { ctrl_field = 0b0010; }
-        case JC:  if(whole_instr->X_op == JC)  { ctrl_field = 0b0011; }
-        case JNC: if(whole_instr->X_op == JNC) { ctrl_field = 0b0100; }
-        case JN:  if(whole_instr->X_op == JN)  { ctrl_field = 0b0101; }
-        case JNN: if(whole_instr->X_op == JNN) { ctrl_field = 0b0110; }
-        case JV:  if(whole_instr->X_op == JV)  { ctrl_field = 0b0111; }
-        case JNV: if(whole_instr->X_op == JNV) { ctrl_field = 0b1000; }
-        case JL:  if(whole_instr->X_op == JL)  { ctrl_field = 0b1010; }
-        case JLE: if(whole_instr->X_op == JLE) { ctrl_field = 0b1011; }
-        case JH:  if(whole_instr->X_op == JH)  { ctrl_field = 0b1100; }
-        case JHE: if(whole_instr->X_op == JHE) { ctrl_field = 0b1101; }
-        case JSE: if(whole_instr->X_op == JSE) { ctrl_field = 0b1110; }
-        case JG:  if(whole_instr->X_op == JG)  { ctrl_field = 0b1111; }
-        case JSR: if(whole_instr->X_op == JSR) { ctrl_field = 0b1001; }
+        case JMP: if(whole_instr->X_op == JMP) { ctrl_field = JMP_CTRL; }
+        case JZ:  if(whole_instr->X_op == JZ)  { ctrl_field = JZ_CTRL;  }
+        case JNZ: if(whole_instr->X_op == JNZ) { ctrl_field = JNZ_CTRL; }
+        case JC:  if(whole_instr->X_op == JC)  { ctrl_field = JC_CTRL;  }
+        case JNC: if(whole_instr->X_op == JNC) { ctrl_field = JNC_CTRL; }
+        case JN:  if(whole_instr->X_op == JN)  { ctrl_field = JN_CTRL;  }
+        case JNN: if(whole_instr->X_op == JNN) { ctrl_field = JNN_CTRL; }
+        case JV:  if(whole_instr->X_op == JV)  { ctrl_field = JV_CTRL;  }
+        case JNV: if(whole_instr->X_op == JNV) { ctrl_field = JNV_CTRL; }
+        case JL:  if(whole_instr->X_op == JL)  { ctrl_field = JL_CTRL;  }
+        case JLE: if(whole_instr->X_op == JLE) { ctrl_field = JLE_CTRL; }
+        case JH:  if(whole_instr->X_op == JH)  { ctrl_field = JH_CTRL;  }
+        case JHE: if(whole_instr->X_op == JHE) { ctrl_field = JHE_CTRL; }
+        case JSE: if(whole_instr->X_op == JSE) { ctrl_field = JSE_CTRL; }
+        case JG:  if(whole_instr->X_op == JG)  { ctrl_field = JG_CTRL;  }
+        case JSR: if(whole_instr->X_op == JSR) { ctrl_field = JSR_CTRL; }
              gas_assert(whole_instr->X_add_symbol != 0);
 
             first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
@@ -715,10 +715,10 @@ void md_assemble(char *insn_str)
         /********************************************************/  
 
     /* No operand at all --------------------------------------------------------*/
-        case RTS: if(whole_instr->X_op == RTS) { ctrl_field = 0b1010; }
-        case RTI: if(whole_instr->X_op == RTI) { ctrl_field = 0b1011; }
-        case CLI: if(whole_instr->X_op == CLI) { ctrl_field = 0b1100; }
-        case STI: if(whole_instr->X_op == STI) { ctrl_field = 0b1101; }
+        case RTS: if(whole_instr->X_op == RTS) { ctrl_field = RTS_CTRL; }
+        case RTI: if(whole_instr->X_op == RTI) { ctrl_field = RTI_CTRL; }
+        case CLI: if(whole_instr->X_op == CLI) { ctrl_field = CLI_CTRL; }
+        case STI: if(whole_instr->X_op == STI) { ctrl_field = STI_CTRL; }
             insn->B_type.prefix = OP_B_TYPE_PREFIX;
             insn->B_type.rX_or_ctrl = ctrl_field;
             insn->B_type.opcode = OP_DATALESS;

@@ -31,6 +31,9 @@ extern int print_insn_big_nios2	(bfd_vma, disassemble_info *);
 extern int print_insn_big_powerpc	(bfd_vma, disassemble_info *);
 extern int print_insn_big_score         (bfd_vma, disassemble_info *);
 extern int print_insn_cr16              (bfd_vma, disassemble_info *);
+
+extern int print_insn_minirisc              (bfd_vma, disassemble_info *);
+
 extern int print_insn_crx               (bfd_vma, disassemble_info *);
 extern int print_insn_csky		(bfd_vma, disassemble_info *);
 extern int print_insn_d10v		(bfd_vma, disassemble_info *);
