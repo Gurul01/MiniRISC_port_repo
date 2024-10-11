@@ -28,7 +28,7 @@ typedef struct reg_type{
     char name[4];
     uint8_t number;
 } reg_type;
-reg_type reg_array[16];
+reg_type reg_array[MINIRISC_NUM_REGISTERS];
 
 htab_t reg_table; //struct hash_control *reg_table;
 
@@ -57,28 +57,6 @@ static int eq_func (const void *entry1, const void *entry2)
 /*************************************************************/
 static int minirisc_parse_register(const char *name, expressionS *resultP)
 {
-    // symbolS *reg_sym = hash_find(reg_table, name); //bfd_hash_lookup
-
-    // if(reg_sym != 0)
-    // {
-    //     resultP->X_op = O_register;
-    //     resultP->X_add_number = S_GET_VALUE(reg_sym);
-    //     return 1;
-    // }
-
-    // Lookup in the hash table
-    // void **slot = htab_find_slot (reg_table, name, NO_INSERT);
-    // if (slot && *slot != NULL)
-    // {
-    //     symbolS *reg_sym = (symbolS *) *slot;
-
-    //     resultP->X_op = O_register;
-    //     resultP->X_add_number = S_GET_VALUE(reg_sym);
-
-    //     printf("Reached_parse_reg: %s\n", name);
-    //     return 1;
-    // }
-
     for(int i = 0; i < MINIRISC_NUM_REGISTERS; i++)
     {
         if(0 == strcmp(name, reg_array[i].name))
@@ -94,32 +72,6 @@ static int minirisc_parse_register(const char *name, expressionS *resultP)
     return 0;
 }
 
-/*************************************************************/
-/*   Catch 'jump'     */
-/*************************************************************/
-// static int minirisc_parse_branch(const char *name, expressionS *resultP, char *next_char)
-// {
-//     expressionS op_expr;
-
-//     if( strcmp(name, "jmp") )
-//         return 0;
-
-//     (void) restore_line_pointer(*next_char);
-//     SKIP_WHITESPACE();
-
-//     if('(' != *input_line_pointer)
-//         as_warn("no '(' after jmp");
-
-//     memset(&op_expr, 0, sizeof(expressionS));
-//     expression(&op_expr);
-
-//     resultP->X_add_symbol = make_expr_symbol(&op_expr);
-//     resultP->X_op = O_jump;
-
-//     *next_char = *input_line_pointer;
-//     symbol_get_value_expression
-//     return 1;
-// }
 
 /*************************************************************/
 /*   If non of the others is true then we have a symbol      */
@@ -448,21 +400,6 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
 /*************************************************************/
 /*   Catch assembler keywords, hook custom name checking     */
 /*************************************************************/
-// int minirisc_parse_name(const char *name, expressionS *resultP, char *next_char)
-// {
-//     gas_assert(name != 0 && resultP != 0);
-
-//     if(minirisc_parse_register(name, resultP) != 0)
-//         return 1;
-//     /* if(minirisc_parse_port(name, resultP) != 0)
-//         return 1; */
-//     if(minirisc_parse_branch(name, resultP, next_char) != 0)
-//         return 1;
-//     if(minirisc_parse_symbol(name, resultP) != 0)
-//         return 1;
-
-//     return 0;
-// }
 int minirisc_parse_name(const char *name, expressionS *resultP, char *next_char)
 {
     gas_assert(name != 0 && resultP != 0);
@@ -486,42 +423,12 @@ int minirisc_parse_name(const char *name, expressionS *resultP, char *next_char)
 
 void md_begin(void)
 {
-    int i;
-    reg_table = htab_create (MINIRISC_NUM_REGISTERS, hash_func, eq_func, NULL);//reg_table = hash_new();
-
-    // for(i = 0; i < MINIRISC_NUM_REGISTERS; i++)
-    // {
-    //     char name[4];
-
-    //     sprintf(name, "r%d", i);
-
-    //     symbolS *reg_sym = symbol_new(name, reg_section, i, &zero_address_frag);
-
-    //     if(hash_insert(reg_table, S_GET_NAME(reg_sym), (PTR)reg_sym))
-    //     {
-    //         as_fatal(_("failed to create register symbols"));
-    //     }
-    // }
-
-    for (i = 0; i < MINIRISC_NUM_REGISTERS; i++)
+    for (int i = 0; i < MINIRISC_NUM_REGISTERS; i++)
     {
-        // char name[4];
-        // sprintf(name, "r%d", i);
-
-        // // Create a new symbol for each register
-        // symbolS *reg_sym = symbol_new (name, reg_section, &zero_address_frag, i);
-
-        // // Insert the symbol into the hash table
-        // void **slot = htab_find_slot (reg_table, S_GET_NAME(reg_sym), INSERT);
-        // if (slot == NULL || *slot != NULL)
-        // {
-        //     as_fatal (_("failed to create register symbols"));
-        // }
-
-        // *slot = (void *)reg_sym;
-
         reg_array[i].number = i;
         sprintf(reg_array[i].name, "r%d", i);
+
+        (void)symbol_new(reg_array[i].name, reg_section, &zero_address_frag, reg_array[i].number);
     }
 }
 
@@ -779,6 +686,14 @@ void md_assemble(char *insn_str)
                 insn->A_type.rX_or_ctrl = ctrl_field;
                 insn->A_type.immed = first_op->X_add_number;
             }
+            else if(first_op->X_op == O_symbol)
+            {
+                insn->A_type.opcode = OP_CTRL;
+                insn->A_type.rX_or_ctrl = ctrl_field;
+                // Devide by 2 because for some reason in the elf file
+                // one instr counts occupies two addresses:
+                insn->A_type.immed = S_GET_VALUE(first_op->X_add_symbol) / 2;
+            }
             else if(first_op->X_op == O_register)
             {
                 insn->B_type.prefix = OP_B_TYPE_PREFIX;
@@ -844,11 +759,6 @@ const char *md_atof(int type, char *lit, int *size)
 
 valueT md_section_align(asection *seg, valueT size)
 {
-    // int align = bfd_gert_section_alignment(stdoutput, seg);
-    // int new_size = ((size + (1 << align) - 1) & -(1 << align));
-
-    // return new_size;
-
     // Get the section alignment as a power of 2
     int align = seg->alignment_power;
 
