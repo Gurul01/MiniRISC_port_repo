@@ -481,8 +481,9 @@ void md_assemble(char *insn_str)
     // int assign_pos;
     // char *assign;
     insn        = (minirisc_slot_insn*)malloc(sizeof(minirisc_insn_A_type));
-    whole_instr = (expressionS*)malloc(sizeof(expressionS));
+    memset(insn, 0, sizeof(minirisc_slot_insn));
 
+    whole_instr = (expressionS*)malloc(sizeof(expressionS));
     input_line_pointer = insn_str;
     SKIP_ALL_WHITESPACE();
     memset(whole_instr, 0, sizeof(expressionS));
@@ -692,7 +693,7 @@ void md_assemble(char *insn_str)
                 insn->A_type.rX_or_ctrl = ctrl_field;
                 // Devide by 2 because for some reason in the elf file
                 // one instr counts occupies two addresses:
-                insn->A_type.immed = S_GET_VALUE(first_op->X_add_symbol) / 2;
+                //insn->A_type.immed = S_GET_VALUE(first_op->X_add_symbol); // "/2"
             }
             else if(first_op->X_op == O_register)
             {
@@ -731,7 +732,7 @@ void md_assemble(char *insn_str)
     }
 
     minirisc_emit_insn(insn);
-    free(insn);
+    //free(insn);
 
     if(error != 0)
     {
