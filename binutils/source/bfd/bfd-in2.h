@@ -5944,6 +5944,10 @@ enum bfd_reloc_code_real
   BFD_RELOC_CR16_GOTC_REGREL20,
   BFD_RELOC_CR16_GLOB_DAT,
 
+  /* Relative relocation which is probably not
+     needed as there is no relative jump in the MiniRISC.  */
+  BFD_RELOC_MINIRISC_RELATIVE,
+
   /* NS CRX Relocations.  */
   BFD_RELOC_CRX_REL4,
   BFD_RELOC_CRX_REL8,

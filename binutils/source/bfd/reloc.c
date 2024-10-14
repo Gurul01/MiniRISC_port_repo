@@ -5835,6 +5835,12 @@ ENUMDOC
   NS CR16 Relocations.
 
 ENUM
+  BFD_RELOC_MINIRISC_RELATIVE
+ENUMDOC
+  Relative relocation which is probably not
+  needed as there is no relative jump in the MiniRISC.
+
+ENUM
   BFD_RELOC_CRX_REL4
 ENUMX
   BFD_RELOC_CRX_REL8

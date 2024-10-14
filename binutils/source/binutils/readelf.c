@@ -101,6 +101,7 @@
 #include "elf/arm.h"
 #include "elf/avr.h"
 #include "elf/bfin.h"
+#include "elf/minirisc.h"
 #include "elf/cr16.h"
 #include "elf/cris.h"
 #include "elf/crx.h"
@@ -1171,6 +1172,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_AVR:
     case EM_AVR_OLD:
     case EM_BLACKFIN:
+    case EM_MINIRISC:
     case EM_CR16:
     case EM_CRIS:
     case EM_CRX:
@@ -1689,6 +1691,10 @@ dump_relocations (Filedata *filedata,
 	{
 	default:
 	  rtype = NULL;
+	  break;
+
+  case EM_MINIRISC:
+	  rtype = elf_minirisc_reloc_type (type);
 	  break;
 
 	case EM_AARCH64:
