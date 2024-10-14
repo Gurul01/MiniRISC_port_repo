@@ -19,7 +19,7 @@ struct minirisc_relocation_map
 static const struct minirisc_relocation_map minirisc_reloc_map[] =
 {
     { BFD_RELOC_NONE,              R_MINIRISC_NONE    },
-    { BFD_RELOC_32,                R_MINIRISC_32      },
+    { BFD_RELOC_8,                 R_MINIRISC_8       },
     { BFD_RELOC_MINIRISC_RELATIVE, R_MINIRISC_RELATIVE},
 };
 
@@ -41,44 +41,44 @@ static reloc_howto_type minirisc_elf_howto_table[] =
 {
     HOWTO (R_MINIRISC_NONE,      // type                            
         0,                       // rightshift   
-        3,                       // size(0 = byte, 1 = short, 2 = long)
-        0,                       // bitsize   
+        1,                       // size(0 = byte, 1 = short, 2 = long)
+        8,                       // bitsize   
         false,                   // pc_relative       
         0,                       // bitpos   
         complain_overflow_dont,  // complain_on_overflow                        
         bfd_elf_generic_reloc,   // special_function   
         "R_MINIRISC_NONE",       // name   
-        false,                   // partial_inplace       
+        true,                    // partial_inplace       
         0,                       // src_mask   
         0,                       // dst_mask   
         false),                  // pcrel_offset        
 
-    HOWTO (R_MINIRISC_32,            // type                            
+    HOWTO (R_MINIRISC_8,             // type                            
         0,                           // rightshift   
-        0,                           // size(0 = byte, 1 = short, 2 = long)
+        1,                           // size(0 = byte, 1 = short, 2 = long)
         8,                           // bitsize    
         false,                       // pc_relative           
         0,                           // bitpos   
         complain_overflow_bitfield,  // complain_on_overflow                                        
         bfd_elf_generic_reloc,       // special_function                       
-        "R_MINIRISC_32",             // name                 
-        false,                       // partial_inplace           
+        "R_MINIRISC_8",              // name                 
+        true,                        // partial_inplace           
         0,                           // src_mask   
-        0xff,                        // dst_mask            
+        0x00ff,                      // dst_mask            
         false),                      // pcrel_offset             
 
     HOWTO (R_MINIRISC_RELATIVE,     // type                              
         0,                          // rightshift   
-        0,                          // size(0 = byte, 1 = short, 2 = long)
+        1,                          // size(0 = byte, 1 = short, 2 = long)
         8,                          // bitsize    
         true,                       // pc_relative          
         0,                          // bitpos   
         complain_overflow_bitfield, // complain_on_overflow                                        
         bfd_elf_generic_reloc,      // special_function                       
-        "R_LM32_RELATIVE",          // name                   
-        false,                      // partial_inplace           
-        0xff,                       // src_mask            
-        0xff,                       // dst_mask            
+        "R_LM8_RELATIVE",           // name                   
+        true,                       // partial_inplace           
+        0xff,                       // src_mask  - not sure about the scr mask          
+        0x00ff,                     // dst_mask            
         true),                      // pcrel_offset            
 };
 
@@ -109,7 +109,7 @@ static reloc_howto_type* minirisc_reloc_type_lookup(bfd* abfd, bfd_reloc_code_re
 
     for(i = 0; i < R_MINIRISC_MAX; i++)
     {
-        if(code == minirisc_reloc_map[i].elf_reloc_val)
+        if(code == minirisc_reloc_map[i].bfd_reloc_val)
         {
             howto_index = minirisc_reloc_map[i].elf_reloc_val;
             return &minirisc_elf_howto_table[howto_index];

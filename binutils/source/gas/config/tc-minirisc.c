@@ -64,7 +64,6 @@ static int minirisc_parse_register(const char *name, expressionS *resultP)
             resultP->X_op = O_register;
             resultP->X_add_number = reg_array[i].number;
 
-            printf("Reached_parse_reg: %s\n", name);
             return 1;
         }
     }
@@ -388,11 +387,8 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
             break;
 
         default:
-            printf("Couldn't find symbol with strcmp!");
             return 0;
     }
-
-    printf("Reached_parse_opcode: %d\n", opcode);
 
     return 1;
 }
@@ -432,12 +428,13 @@ void md_begin(void)
     }
 }
 
-static void minirisc_emit_insn(minirisc_slot_insn *insn)
+static void minirisc_emit_insn(minirisc_slot_insn *insn, expressionS *whole_instr)
 {
     gas_assert(insn != 0);
 
     uint16_t e_insn = 0;
     char *frag = frag_more(MINIRISC_BYTES_SLOT_INSTRUCTION);
+    bool is_op_ctrl = false;
 
     if((insn->B_type.prefix & 0xF) == OP_B_TYPE_PREFIX)
     {
@@ -451,10 +448,28 @@ static void minirisc_emit_insn(minirisc_slot_insn *insn)
         e_insn |= ((insn->A_type.opcode & 0xF)     << (4*3));
         e_insn |= ((insn->A_type.rX_or_ctrl & 0xF) << (4*2));
         e_insn |= ((insn->A_type.immed & 0xFF)     << (4*0));
+
+        if(OP_SWP_SHIFT != insn->A_type.opcode)
+        {
+            expressionS *addr_expr = symbol_get_value_expression(whole_instr->X_add_symbol);
+            int where;
+            
+            know(O_symbol == addr_expr->X_op);
+
+            /*Get the location in the current frag where the fixup is to be inserted*/
+            where = frag - frag_now->fr_literal;
+
+            /*Reverse giving '1' as value to the X_add_number so it won't be turned into a const expression */
+            addr_expr->X_add_number = 0;
+
+            (void)fix_new_exp(frag_now, where, 1, addr_expr, 0, BFD_RELOC_8);
+
+            /*If we had relative relocation for an instruction:*/
+            //(void)fix_new_exp(frag_now, where, 1, addr_expr, 1, BFD_RELOC_MINIRISC_RELATIVE);
+        }   
     }
 
-     printf("Reached_4: num0: %d\n", *insn);
-     printf("Reached_4: num: %d\n", e_insn);
+    printf("Instruction is: 0x%04x\n", e_insn);
 
     md_number_to_chars(frag, e_insn, MINIRISC_BYTES_SLOT_INSTRUCTION);
 }
@@ -731,7 +746,7 @@ void md_assemble(char *insn_str)
             as_bad("No such opcode: '%s'\n", whole_instr->X_op);
     }
 
-    minirisc_emit_insn(insn);
+    minirisc_emit_insn(insn, whole_instr);
     //free(insn);
 
     if(error != 0)
@@ -749,7 +764,8 @@ void md_assemble(char *insn_str)
 
 symbolS *md_undefined_symbol(char *name)
 {
-    as_bad("Undefined symbol '%s'\n", name);
+    //as_bad("Undefined symbol '%s'\n", name);
+    as_warn("Symbol not yet defined '%s'\n", name);
     return 0;
 }
 
@@ -775,20 +791,50 @@ void md_convert_frag(bfd *abfd, asection *seg, fragS *fragp)
     return;
 }
 
+/*See if a symbol has been resolved by now. If so, apply the fix.*/
 void md_apply_fix(fixS *fixp, valueT *val, segT seg)
 {
-    return;
+    char *buf;
+
+    /* 'fixup_segment' drops 'fx_addsy' and resets 'fx_pcrel' in case of a successful resolution */
+    if(0 == fixp->fx_addsy && 0 == fixp->fx_pcrel)
+    {
+        /*Location in the segment we are going to patch*/
+        buf = fixp->fx_frag->fr_literal + fixp->fx_where;
+
+        /*Can only fix relative jumps*/
+        if(BFD_RELOC_MINIRISC_RELATIVE == fixp->fx_r_type)
+        {
+            bfd_put_32(stdoutput, *val, buf);
+            fixp->fx_done = 1;
+        }
+    }
 }
 
+/*Turn fixups that cannot be turned into relocations and let the linker deal with them*/
 arelent *tc_gen_reloc(asection *seg, fixS *fixp)
 {
-    return 0;
+    arelent *reloc;
+    symbolS *sym;
+
+    gas_assert(fixp != 0);
+
+    reloc = XNEW(arelent);
+    reloc->sym_ptr_ptr = XNEW(asymbol*);
+    *reloc->sym_ptr_ptr = symbol_get_bfdsym(fixp->fx_addsy);
+
+    reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+    reloc->howto = bfd_reloc_type_lookup(stdoutput, fixp->fx_r_type);
+    reloc->addend = fixp->fx_offset;
+    
+    return reloc;
 }
 
+/*The location of a fixup (from where a pc_relative jump is calculated)*/
 long md_pcrel_from(fixS *fixp)
 {
     as_fatal(_("unexpected_call"));
-    return 0;
+    return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 
 int md_estimate_size_before_relax(fragS *fragp, asection *seg)

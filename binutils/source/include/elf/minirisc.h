@@ -6,7 +6,7 @@
 /*A small subset of supported relocation types*/
 START_RELOC_NUMBERS (elf_minirisc_reloc_type)
     RELOC_NUMBER  (R_MINIRISC_NONE,     0)
-    RELOC_NUMBER  (R_MINIRISC_32,       1)
+    RELOC_NUMBER  (R_MINIRISC_8,        1)
     RELOC_NUMBER  (R_MINIRISC_RELATIVE, 2)
 END_RELOC_NUMBERS (R_MINIRISC_MAX)
 
