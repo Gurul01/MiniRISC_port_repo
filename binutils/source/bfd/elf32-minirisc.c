@@ -55,8 +55,8 @@ static reloc_howto_type minirisc_elf_howto_table[] =
 
     HOWTO (R_MINIRISC_32,            // type                            
         0,                           // rightshift   
-        2,                           // size(0 = byte, 1 = short, 2 = long)
-        32,                          // bitsize    
+        0,                           // size(0 = byte, 1 = short, 2 = long)
+        8,                           // bitsize    
         false,                       // pc_relative           
         0,                           // bitpos   
         complain_overflow_bitfield,  // complain_on_overflow                                        
@@ -64,21 +64,21 @@ static reloc_howto_type minirisc_elf_howto_table[] =
         "R_MINIRISC_32",             // name                 
         false,                       // partial_inplace           
         0,                           // src_mask   
-        0xffffffff,                  // dst_mask            
+        0xff,                        // dst_mask            
         false),                      // pcrel_offset             
 
     HOWTO (R_MINIRISC_RELATIVE,     // type                              
         0,                          // rightshift   
-        2,                          // size(0 = byte, 1 = short, 2 = long)
-        32,                         // bitsize    
+        0,                          // size(0 = byte, 1 = short, 2 = long)
+        8,                          // bitsize    
         true,                       // pc_relative          
         0,                          // bitpos   
         complain_overflow_bitfield, // complain_on_overflow                                        
         bfd_elf_generic_reloc,      // special_function                       
         "R_LM32_RELATIVE",          // name                   
         false,                      // partial_inplace           
-        0xffffffff,                 // src_mask            
-        0xffffffff,                 // dst_mask            
+        0xff,                       // src_mask            
+        0xff,                       // dst_mask            
         true),                      // pcrel_offset            
 };
 
