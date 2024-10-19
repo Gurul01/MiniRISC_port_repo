@@ -4,6 +4,7 @@
         "bfd.h": "c",
         "minirisc.h": "c",
         "atomic": "c",
-        "cstdint": "c"
+        "cstdint": "c",
+        "coretypes.h": "c"
     }
 }

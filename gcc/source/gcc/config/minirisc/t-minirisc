@@ -1,0 +1,5 @@
+# This is the 'Makefile' for the final target object. We keep things
+# simple here and only make it depend on the auto merated heades
+# in gcc/build
+
+$(out_object_file): gt-minirisc.h
