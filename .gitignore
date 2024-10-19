@@ -1,2 +1,4 @@
 /binutils/build/
 /binutils/install/
+/gcc/build/
+/gcc/install/
