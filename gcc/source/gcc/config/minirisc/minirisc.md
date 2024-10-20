@@ -7,17 +7,17 @@
 ;; -----------------------------------------------------------------------
 
 (define_insn "addsi3"
-  [(set (match_operand:SI 0 "register operand" "=r")
+  [(set (match_operand:SI 0 "register_operand" "=r")
         (plus:SI (match_operand:SI 1 "register_operand" "r")
                  (match_operand:SI 2 "register_operand" "r")))]
-  "chilt_dummy_insn_cond(SImode)"
+  "minirisc_dummy_insn_cond(SImode)"
   "%0 = %1 + %2;"
 )
 
 ;; -----------------------------------------------------------------------
 
 (define_insn "nop"
-  [(const int 0)]
+  [(const_int 0)]
   ""
   "nop"
 )

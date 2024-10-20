@@ -5,6 +5,9 @@
         "minirisc.h": "c",
         "atomic": "c",
         "cstdint": "c",
-        "coretypes.h": "c"
+        "coretypes.h": "c",
+        "common-target-def.h": "c",
+        "optabs.h": "c",
+        "*.def": "c"
     }
 }

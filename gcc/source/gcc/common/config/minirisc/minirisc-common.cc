@@ -5,4 +5,4 @@
 #include "common/common-target.h"
 #include "common/common-target-def.h"
 
-struct gec_target_common targetm_common = TARGETM_COMMON_INITIALIZER;
+struct gcc_target_common targetm_common = TARGETM_COMMON_INITIALIZER;

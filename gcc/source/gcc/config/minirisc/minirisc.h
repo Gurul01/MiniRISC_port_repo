@@ -5,10 +5,10 @@
 /* 32 bit little endian ISA */ 
 #define UNITS_PER_WORD          4
 #define MAX_BITS_PER_WORD       32
-#define BITS_BIG_ENDIAN         O
-#define BYTES_BIG_ENDIAN        O 
-#define WORDS_BIG_ENDIAN        O
-#define STRICT_ALIGNMENT        O
+#define BITS_BIG_ENDIAN         0
+#define BYTES_BIG_ENDIAN        0 
+#define WORDS_BIG_ENDIAN        0
+#define STRICT_ALIGNMENT        0
 #define POINTER_BOUNDARY        32
 #define PARM_BOUNDARY           32
 #define FUNCTION_BOUNDARY       32
@@ -53,10 +53,10 @@ enum reg_class {
 #define REG_CLASS_NAMES \
 {                       \
     "NO_REGS",          \    
-    "SP REG",           \  
+    "SP_REG",           \  
     "FP_REG",           \  
     "ASM_REGS",         \     
-    "GP REGS",          \   
+    "GP_REGS",          \   
     "ALL_REGS"          \   
 }
 
@@ -73,11 +73,11 @@ enum reg_class {
     { 0x00000000, 0x40000000 }, /* stack pointer (r62) */                \
     { 0x00000000, 0x20000000 }, /* frame pointer (r61) */                \
     { 0x00000000, 0x1f800000 }, /* inline asm regs (r55-r60) */          \
-    { 0xffffffff, Oxe07fffff }, /* all but inline asm registers */       \
-    { Oxffffffff, Oxffffffff } /* all registers */                       \
+    { 0xffffffff, 0xe07fffff }, /* all but inline asm registers */       \
+    { 0xffffffff, 0xffffffff } /* all registers */                       \
 }
 
-#define FIXED_REGISTERS
+#define FIXED_REGISTERS                               \
 {                                                     \
     /* го-г15 */                                      \
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,   \
@@ -92,7 +92,7 @@ enum reg_class {
 }
 
 /* list of registers potentially clobbered by callee's */
-#define CALL_USED_REGISTERS
+#define CALL_USED_REGISTERS                               \
 {                                                         \
     /* го-г6*/                                            \
     1, 1, 1, 1, 1, 1, 1,                                  \
@@ -109,7 +109,8 @@ enum reg_class {
 }
 
 /* suggest a register allocation order */
-#define REG_ALLOC_ORDER {                                           \
+#define REG_ALLOC_ORDER                                             \
+{                                                                   \
     15, 16, 17, 18, 19, 20, 21, 22,  /* caller saved registers */   \
     23, 24, 25, 26, 27, 28, 29, 30,                                 \
     31, 32, 33, 34, 35, 36, 37, 38,                                 \
@@ -130,7 +131,7 @@ enum reg_class {
 #define REGNO_OK_FOR_INDEX_P(REGNO) minirisc_valid_regno_for_index_p(REGNO)
 
 #define BASE_REG_CLASS  reg_class::GP_REGS
-#define INDEX REG_CLASS reg_class::GP_REGS
+#define INDEX_REG_CLASS reg_class::GP_REGS
 
 #define FIRST_ARG_REGNUM          1
 #define LAST_ARG_REGNUM           6
@@ -140,21 +141,21 @@ enum reg_class {
 #define LAST_CALLEE_SAVED_REGNUM  14
 #define STACK_POINTER_REGNUM      62
 #define FRAME_POINTER_REGNUM      61
-#define RET_VALUE_REGNUM          O
+#define RET_VALUE_REGNUM          0
 #define RET_ADDRESS_REGNUM        63
 #define FIRST_PSEUDO_REGISTER     64
 #define MAX_REGS_PER_ADDRESS      1
 #define ARG_POINTER_REGNUM        FRAME_POINTER_REGNUM
 #define NUM_ARG_REGISTERS         LAST_ARG_REGNUM
 
-#define ELIMINABLE_REGS {{ FRAME_ POINTER_REGNUM }}
+#define ELIMINABLE_REGS {{ FRAME_POINTER_REGNUM }}
 #define INITIAL_ELIMINATION_OFFSET(FROM, TO, OFFSET) (OFFSET) = minirisc_initial_elimination_offset((FROM), (TO))
 
 /*****************************************/
 /* Memory, stack, function args          */
 /*****************************************/
 #define MOVE_MAX                 4
-#define SLOW_BYTE_ACCESS         O
+#define SLOW_BYTE_ACCESS         0
 #define PUSH_ARGS                0
 #define ACCUMULATE_OUTGOING_ARGS 1
 #define STACK_BOUNDARY           32
@@ -174,13 +175,13 @@ typedef struct
 #define CUMULATIVE_ARGS minirisc_cumulative_arg_info
 
 /* init cumulative args */
-#define INIT_CUMULATIVE_ARGS (CUM, FNTYPE, LIBNAME, INDIRECT, N_NAMED_ARGS) \
+#define INIT_CUMULATIVE_ARGS(CUM, FNTYPE, LIBNAME, INDIRECT, N_NAMED_ARGS) \
         minirisc_init_cumulative_args(&CUM, FNTYPE, LIBNAME, INDIRECT, N_NAMED_ARGS);
 
 /* misc. function stuff */
-#define FUNCTION ARG_REGNO_ P(N) ((N >= FIRST_ARG_REGNUM) 8& (N <= LAST_ARG_REGNUM))
+#define FUNCTION_ARG_REGNO_P(N) ((N >= FIRST_ARG_REGNUM) && (N <= LAST_ARG_REGNUM))
 
-#define FIRST_PARM_OFFSET(FNDECL) O
+#define FIRST_PARM_OFFSET(FNDECL) 0
 
 /******************************************************************************/
 /* Misc.                                                                      */
