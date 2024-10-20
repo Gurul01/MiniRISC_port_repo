@@ -47,14 +47,14 @@ static function_arg_info arg_info;
 
 /* Forward declaration of hooks we assign/implement here */
 static bool minirisc_lra_p(void);
-static bool minirisc_legitimate_address_p(machine_mode mode, rtx x, bool strict);
-static bool minirisc_must_pass_in_stack(machine_mode mode, const_tree type);
+static bool minirisc_legitimate_address_p(machine_mode mode, rtx x, bool strict); //const function_arg_info &arg
+static bool minirisc_must_pass_in_stack(const function_arg_info &arg);
 
 static bool minirisc_function_value_regno_p(const unsigned int regno);
 static rtx minirisc_function_value(const_tree ret_type, const_tree fn_type, bool out);
 
-static rtx minirisc_function_arg(cumulative_args_t ca, machine_mode mode, const_tree type, bool named);
-static void chill_function_arg_advance(cumulative_args_t ca, machine_mode mode, const_tree type, bool named);
+static rtx minirisc_function_arg(cumulative_args_t ca, const function_arg_info &arg);
+static void chill_function_arg_advance(cumulative_args_t ca, const function_arg_info &arg);
 
 static void minirisc_init_libfuncs(void);
 
@@ -117,13 +117,40 @@ static bool minirisc_lra_p(void)
 }
 
 /******************************************************************************/
+/* Need to tell what is considered to be a 'legitimate address'. For now
+   we support only basic addressing, which includes registers, constants
+   and their combinations. */
+/******************************************************************************/
 static bool minirisc_legitimate_address_p(machine_mode mode, rtx x, bool strict)
 {
-    return true;
+    int base_code;
+    int off_code;
+
+    if(SImode == mode)
+    {
+        /* single operand addressing, register or immediate */
+        if(REG == GET_CODE(x) || CONST_INT == GET_CODE(x))
+        {
+            return true;
+        }
+        else if(PLUS == GET_CODE(x))
+        {
+            /* base + offset addressing */
+            base_code = GET_CODE(XEXP(x, 0));
+            off_code  = GET_CODE(XEXP(x, 1));
+
+            if((REG == off_code || CONST_INT == off_code) && (REG == base_code))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 /******************************************************************************/
-static bool minirisc_must_pass_in_stack(machine_mode mode, const_tree type)
+static bool minirisc_must_pass_in_stack(const function_arg_info &arg)
 {
     return false;
 }
@@ -135,19 +162,24 @@ static bool minirisc_function_value_regno_p(const unsigned int regno)
 }
 
 /******************************************************************************/
+/* Integral types up to 'int' are handled in the SImode. For the rest a dummy
+   reg rtx is created. */
+/******************************************************************************/
 static rtx minirisc_function_value(const_tree ret_type, const_tree fn_type, bool out)
 {
-    return NULL_RTX;
+    if(INTEGRAL_TYPE_P(ret_type) && TYPE_PRECISION(ret_type) < BITS_PER_WORD)
+        return gen_rtx_REG(SImode, RET_VALUE_REGNUM);
+    else return gen_rtx_REG(TYPE_MODE(ret_type), RET_VALUE_REGNUM);
 }
 
 /******************************************************************************/
-static rtx minirisc_function_arg(cumulative_args_t ca, machine_mode mode, const_tree type, bool named)
+static rtx minirisc_function_arg(cumulative_args_t ca, const function_arg_info &arg)
 {
     return NULL_RTX;
 }
 
 /******************************************************************************/
-static void chill_function_arg_advance(cumulative_args_t ca, machine_mode mode, const_tree type, bool named)
+static void chill_function_arg_advance(cumulative_args_t ca, const function_arg_info &arg)
 {
     return;
 }
@@ -165,8 +197,28 @@ static rtx minirisc_libcall_value(machine_mode mode, const_rtx fun)
 }
 
 /******************************************************************************/
+/* Print instruction operands properly */
+/******************************************************************************/
 static void minirisc_print_operand(FILE *file, rtx op, int letter)
 {
+    if(op != 0)
+    {
+        if(REG == GET_CODE(op))
+        {
+            fprintf(file, "%s", reg_names[REGNO(op)]);
+        }
+        else if(MEM == GET_CODE(op))
+        {
+            output_address(GET_MODE(op), XEXP(op, 0));
+        }
+        else
+        {
+            /* this includes constants and all other constant
+               expressions including labels, symbols and floating
+               points as integers */
+            output_addr_const(file, op);
+        }
+    }
     return;
 }
 
@@ -214,6 +266,26 @@ void minirisc_init_cumulative_args(CUMULATIVE_ARGS *ca, tree fn_type, rtx libnam
 bool minirisc_dummy_insn_cond(machine_mode mode)
 {
     return true;
+}
+
+/******************************************************************************/
+
+bool minirisc_valid_movsi_insn(machine_mode mode, rtx operands[2])
+{
+    return true;
+}
+
+/******************************************************************************/
+
+void minirisc_expand_movsi(rtx *operands)
+{
+    if(MEM == GET_CODE(operands[0]) && MEM == GET_CODE(operands[1]))
+    {
+        operands[1] = force_reg(SImode, operands[1]);
+    }
+
+    //emit_insn(gen_movsi_insn(operands[0], operands[1]));
+    emit_move_insn(operands[0], operands[1]);
 }
 
 /* NOTE, this file is auto-generated in gec/build and has to be

@@ -12,4 +12,7 @@ extern int minirisc_valid_regno_for_index_p(int);
 extern void minirisc_init_cumulative_args(CUMULATIVE_ARGS *ca, tree fn_type, rtx libname, tree fn_decl, int num_named);
 extern HOST_WIDE_INT minirisc_initial_elimination_offset(int, int);
 
+extern bool minirisc_valid_movsi_insn(machine_mode mode, rtx operands[2]);
+extern void minirisc_expand_movsi(rtx *operands);
+
 #endif /*__MINIRISC_PROTOS_H__ */
