@@ -3,21 +3,34 @@
 /*****************************************************************************/
 
 /* 32 bit little endian ISA */ 
-#define UNITS_PER_WORD          4
-#define MAX_BITS_PER_WORD       32
-#define BITS_BIG_ENDIAN         0
-#define BYTES_BIG_ENDIAN        0 
-#define WORDS_BIG_ENDIAN        0
-#define STRICT_ALIGNMENT        0
-#define POINTER_BOUNDARY        32
-#define PARM_BOUNDARY           32
-#define FUNCTION_BOUNDARY       32
-#define STRUCTURE_SIZE_BOUNDARY 8
-#define BIGGEST_ALIGNMENT       128
+// #define UNITS_PER_WORD          4
+// #define MAX_BITS_PER_WORD       32
+// #define BITS_BIG_ENDIAN         0
+// #define BYTES_BIG_ENDIAN        0 
+// #define WORDS_BIG_ENDIAN        0
+// #define STRICT_ALIGNMENT        0
+// #define POINTER_BOUNDARY        32
+// #define PARM_BOUNDARY           32
+// #define FUNCTION_BOUNDARY       32
+// #define STRUCTURE_SIZE_BOUNDARY 8
+// #define BIGGEST_ALIGNMENT       128
+
+#define UNITS_PER_WORD          1   // 8-bit data word
+#define MAX_BITS_PER_WORD       8   // Data width in bits
+#define BITS_BIG_ENDIAN         0   // Little-endian bit order within bytes
+#define BYTES_BIG_ENDIAN        0   // Little-endian byte order
+#define WORDS_BIG_ENDIAN        0   // Little-endian word order
+
+#define STRICT_ALIGNMENT        0   // Set to 1 if unaligned access isn't allowed
+#define POINTER_BOUNDARY        8         // Code memory is 16-bit wide
+#define PARM_BOUNDARY           8         // 8-bit boundary for parameters
+#define FUNCTION_BOUNDARY       8  // Function alignment to code memory width
+#define STRUCTURE_SIZE_BOUNDARY 8         // Align structures to 8-bit boundary
+#define BIGGEST_ALIGNMENT       8  // Largest alignment, based on code width
 
 /* treat pointers and function addresses as integers */
-#define FUNCTION_MODE SImode
-#define Pmode SImode
+#define FUNCTION_MODE HImode
+#define Pmode HImode
 
 /* how many int's are required to hold X number of bytes */
 #define MINIRISC_NUM_INTS(X) (((X) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
@@ -41,10 +54,8 @@
 /* available register classes */
 enum reg_class {
     NO_REGS,         /* no registers, expected first by GCC */       \
-    SP_REGS,         /* class containing the stack pointer only */   \
-    FP_REGS,         /* class containing the frame pointer only */   \
-    ASM_REGS,        /* reserved inline asm registers */             \
-    GP_REGS,         /* general purpose integer registers */         \
+    SP_REG,          /* class containing the stack pointer only */   \
+    GP_REGS,         /* all registers */     \
     ALL_REGS,        /* all registers, expected as last class */     \
     LIM_REG_CLASSES  /* expected as finalizer by GCC */              \
 };
@@ -52,12 +63,10 @@ enum reg_class {
 /* names of register classes */
 #define REG_CLASS_NAMES \
 {                       \
-    "NO_REGS",          \    
-    "SP_REG",           \  
-    "FP_REG",           \  
-    "ASM_REGS",         \     
-    "GP_REGS",          \   
-    "ALL_REGS"          \   
+    "NO_REGS",          \
+    "SP_REG",           \
+    "GP_REGS",          \
+    "ALL_REGS"          \
 }
 
 /* register names, lots to type */
@@ -67,60 +76,39 @@ enum reg_class {
 }
 
 /* register class content */
-#define REG_CLASS_CONTENTS                                               \
-{                                                                        \
-    { 0x00000000, 0x00000000 }, /* no registers */                       \
-    { 0x00000000, 0x40000000 }, /* stack pointer (r62) */                \
-    { 0x00000000, 0x20000000 }, /* frame pointer (r61) */                \
-    { 0x00000000, 0x1f800000 }, /* inline asm regs (r55-r60) */          \
-    { 0xffffffff, 0xe07fffff }, /* all but inline asm registers */       \
-    { 0xffffffff, 0xffffffff } /* all registers */                       \
+#define REG_CLASS_CONTENTS                                  \
+{                                                           \
+    { 0x00000000 }, /* no registers */                      \
+    { 0x00008000 }, /* stack pointer (r15) */               \
+    { 0xffffffff }, /* GP registers */                      \
+    { 0xffffffff }  /* all registers */                     \
 }
 
 #define FIXED_REGISTERS                               \
 {                                                     \
     /* го-г15 */                                      \
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,   \
-    /* г16-г31 */                                     \
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,   \
-    /* г32-г47 */                                     \
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,   \
-    /* г48-г54 */                                     \
-    0, 0, 0, 0, 0, 0, 0,                              \
-    /* 55-r63 */                                      \
-    1, 1, 1, 1, 1, 1, 0, 1, 0                         \
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0    \
 }
 
 /* list of registers potentially clobbered by callee's */
 #define CALL_USED_REGISTERS                               \
 {                                                         \
-    /* го-г6*/                                            \
-    1, 1, 1, 1, 1, 1, 1,                                  \
-    /* г7-г14 */                                          \
-    0, 0, 0, 0, 0, 0, 0, 0,                               \
-    /* г15-г31 */                                         \
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,    \
-    /* г32-г47 */                                         \
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,       \
-    /* г48-г54 */                                         \
-    1, 1, 1, 1, 1, 1, 1,                                  \
-    /* г55-г63 */                                         \
-    1, 1, 1, 1, 1, 1, 1, 1, 0                             \
+    /* го-г9*/                                            \
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,                         \
+    /* г10-г13 */                                         \
+    0, 0, 0, 0,                                           \
+    /* г14-г15 */                                         \
+    1, 1                                                  \
 }
 
 /* suggest a register allocation order */
 #define REG_ALLOC_ORDER                                             \
 {                                                                   \
-    15, 16, 17, 18, 19, 20, 21, 22,  /* caller saved registers */   \
-    23, 24, 25, 26, 27, 28, 29, 30,                                 \
-    31, 32, 33, 34, 35, 36, 37, 38,                                 \
-    39, 40, 41, 42, 43, 44, 45, 46,                                 \
-    47, 48, 49, 50, 51, 52, 53, 54,                                 \
+    5, 6, 7, 8, 9,                   /* caller saved registers */   \
+    10, 11, 12, 13,                  /* callee saved registers */   \
     0,                               /* return value register */    \
-    1, 2, 3, 4, 5, 6,                /* argument registers */       \
-    7, 8, 9, 10, 11, 12, 13, 14,     /* callee saved registers */   \
-    61, 63, 62,                      /* fp, ra, sp */               \
-    55, 56, 57, 58, 59, 60           /* fixed asm registers */      \
+    4, 3, 2, 1,                      /* argument registers */       \
+    14, 15,                          /* fp, sp */                   \
 }
 
 #define N_REG_CLASSES (int)reg_class::LIM_REG_CLASSES
@@ -134,19 +122,16 @@ enum reg_class {
 #define INDEX_REG_CLASS reg_class::GP_REGS
 
 #define FIRST_ARG_REGNUM          1
-#define LAST_ARG_REGNUM           6
-#define FIRST_ASM_REGNUM          55
-#define LAST_ASM_REGNUM           60
-#define FIRST_CALLEE_SAVED_REGNUM 7
-#define LAST_CALLEE_SAVED_REGNUM  14
-#define STACK_POINTER_REGNUM      62
-#define FRAME_POINTER_REGNUM      61
+#define LAST_ARG_REGNUM           4
+#define FIRST_CALLEE_SAVED_REGNUM 10
+#define LAST_CALLEE_SAVED_REGNUM  13
 #define RET_VALUE_REGNUM          0
-#define RET_ADDRESS_REGNUM        63
-#define FIRST_PSEUDO_REGISTER     64
+#define FRAME_POINTER_REGNUM      14
+#define STACK_POINTER_REGNUM      15
+#define FIRST_PSEUDO_REGISTER     16
 #define MAX_REGS_PER_ADDRESS      1
 #define ARG_POINTER_REGNUM        FRAME_POINTER_REGNUM
-#define NUM_ARG_REGISTERS         LAST_ARG_REGNUM
+#define NUM_ARG_REGISTERS         LAST_ARG_REGNUM - FIRST_ARG_REGNUM
 
 #define ELIMINABLE_REGS {{ FRAME_POINTER_REGNUM }}
 #define INITIAL_ELIMINATION_OFFSET(FROM, TO, OFFSET) (OFFSET) = minirisc_initial_elimination_offset((FROM), (TO))
@@ -154,16 +139,16 @@ enum reg_class {
 /*****************************************/
 /* Memory, stack, function args          */
 /*****************************************/
-#define MOVE_MAX                 4
+#define MOVE_MAX                 1
 #define SLOW_BYTE_ACCESS         0
 #define PUSH_ARGS                0
 #define ACCUMULATE_OUTGOING_ARGS 1
-#define STACK_BOUNDARY           32
+#define STACK_BOUNDARY           8
 #define STACK_GROWS_DOWNWARD     1
 #define FRAME_GROWS_DOWNWARD     1
-#define STACK_POINTER_OFFSET     -8
+#define STACK_POINTER_OFFSET     -1
 #define EXIT_IGNORE_STACK        1
-#define MAX_ARGS_IN_REGISTERS    6
+#define MAX_ARGS_IN_REGISTERS    4
 
 /* cumulative argument info */
 typedef struct
@@ -190,11 +175,11 @@ typedef struct
 #define DEFAULT_SIGNED_CHAR 1
 
 /* for nested functions only */
-#define TRAMPOLINE_SIZE 64
-#define TRAMPOLINE_ALIGNMENT 32
+#define TRAMPOLINE_SIZE 8
+#define TRAMPOLINE_ALIGNMENT 16
 
 /* treat 'case' labels as integers */
-#define CASE_VECTOR_MODE SImode
+#define CASE_VECTOR_MODE HImode
 
 /* no profiler support yet */
 #define FUNCTION_PROFILER(FILE, LABELNO)  \
@@ -242,5 +227,5 @@ do {                                                     \
 #undef GLOBAL_ASM_OP
 #define GLOBAL_ASM_OP "\t.global\t"
 
-#undef TARGET ASM ALIGNED SI OP
+#undef TARGET_ASM_ALIGNED_SI_OP
 #define TARGET_ASM_ALIGNED_SI_OP "\t.word\t"

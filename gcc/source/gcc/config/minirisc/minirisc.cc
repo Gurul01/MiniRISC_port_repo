@@ -126,7 +126,7 @@ static bool minirisc_legitimate_address_p(machine_mode mode, rtx x, bool strict)
     int base_code;
     int off_code;
 
-    if(SImode == mode)
+    if(HImode == mode)
     {
         /* single operand addressing, register or immediate */
         if(REG == GET_CODE(x) || CONST_INT == GET_CODE(x))
@@ -168,7 +168,7 @@ static bool minirisc_function_value_regno_p(const unsigned int regno)
 static rtx minirisc_function_value(const_tree ret_type, const_tree fn_type, bool out)
 {
     if(INTEGRAL_TYPE_P(ret_type) && TYPE_PRECISION(ret_type) < BITS_PER_WORD)
-        return gen_rtx_REG(SImode, RET_VALUE_REGNUM);
+        return gen_rtx_REG(QImode, RET_VALUE_REGNUM);
     else return gen_rtx_REG(TYPE_MODE(ret_type), RET_VALUE_REGNUM);
 }
 
@@ -281,7 +281,7 @@ void minirisc_expand_movsi(rtx *operands)
 {
     if(MEM == GET_CODE(operands[0]) && MEM == GET_CODE(operands[1]))
     {
-        operands[1] = force_reg(SImode, operands[1]);
+        operands[1] = force_reg(QImode, operands[1]);
     }
 
     //emit_insn(gen_movsi_insn(operands[0], operands[1]));

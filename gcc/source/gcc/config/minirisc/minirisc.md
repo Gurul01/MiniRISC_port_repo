@@ -22,7 +22,7 @@
   (const_string "unknown"))
 
 (define_attr "mode"
-  "unknown,none,SI"
+  "unknown,none,QI"
   (const_string "unknown"))
 
 (define_attr "length"
@@ -37,9 +37,9 @@
 ;; -----------------------------------------------------------------------
 
 (define_insn "movst_insn"
-  [(set (match_operand:SI 0 "nonimmediate_operand" "=r,r,r,m,m")
-        (match_operand:SI 1 "general_operand" "i,r,m,r,J"))]
-  "minirisc_valid_movsi_insn(SImode, operands)"
+  [(set (match_operand:QI 0 "nonimmediate_operand" "=r,r,r,m,m")
+        (match_operand:QI 1 "general_operand" "i,r,m,r,J"))]
+  "minirisc_valid_movsi_insn(QImode, operands)"
   "@
   %0 = %1;
   %0 = %1;
@@ -53,8 +53,8 @@
 
 ;; expand properly depending on the operand types
 (define_expand "movsi"
-  [(set (match_operand:SI 0 "general_operand" "")
-        (match_operand:SI 1 "general_operand" ""))]
+  [(set (match_operand:QI 0 "general_operand" "")
+        (match_operand:QI 1 "general_operand" ""))]
   ""
   "{
       minirisc_expand_movsi(operands);
@@ -79,7 +79,7 @@
 
 ;; indirect unconditional
 (define_insn "indirect_jump"
-  [(set (pc) (match_operand:SI 0 "register_operand" "r"))]
+  [(set (pc) (match_operand:QI 0 "register_operand" "r"))]
   ""
   "jump (%0);"
   [(set_attr "type" "ubranch")]
@@ -93,15 +93,18 @@
   [(set_attr "type" "ubranch")]
 )
 
-
 ;; -----------------------------------------------------------------------
+;; Basic arithmetics, SI mode only, allow register and imm32 operands
+;; -----------------------------------------------------------------------
+
 (define_insn "addsi3"
-  [(set (match_operand:SI 0 "register_operand" "=r")
-        (plus:SI (match_operand:SI 1 "register_operand" "r")
-                 (match_operand:SI 2 "register_operand" "r")))]
-  "minirisc_dummy_insn_cond(SImode)"
+  [(set (match_operand:QI 0 "register_operand" "=r")
+        (plus:QI (match_operand:QI 1 "register_operand" "r")
+                 (match_operand:QI 2 "register_operand" "r")))]
+  "minirisc_dummy_insn_cond(QImode)"
   "%0 = %1 + %2;"
 )
+
 ;; -----------------------------------------------------------------------
 
 (define_insn "nop"
