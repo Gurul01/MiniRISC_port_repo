@@ -391,6 +391,10 @@ ft32*)	cpu_type=ft32
 moxie*)	cpu_type=moxie
 	target_has_targetm_common=no
 	;;
+mrmr16-*-*)
+	cpu_type=mrmr16
+	target_has_targetm_common=no
+	;;
 fido-*-*)
 	cpu_type=m68k
 	extra_headers=math-68881.h
@@ -1755,6 +1759,10 @@ moxie-*-moxiebox*)
 	gnu_ld=yes
 	tm_file="${tm_file} elfos.h moxie/moxiebox.h newlib-stdint.h"
 	tmake_file="${tmake_file} moxie/t-moxiebox"
+	;;
+mrmr16-*-*)
+	gas=yes
+	gnu_ld=yes
 	;;
 h8300-*-elf*)
 	tmake_file="h8300/t-h8300"

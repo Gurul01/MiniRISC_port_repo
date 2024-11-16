@@ -1063,6 +1063,9 @@ case "${target}" in
   moxie-*-*)
     noconfigdirs="$noconfigdirs"
     ;;
+  mrmr16-*-*)
+   noconfigdirs="$noconfigdirs $target_tools $target_libraries"
+    ;;
   h8300*-*-*)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;

@@ -2,3 +2,5 @@
 /binutils/install/
 /gcc/build/
 /gcc/install/
+/gcc/build_mrmr16/
+/gcc/install_mrmr16/
