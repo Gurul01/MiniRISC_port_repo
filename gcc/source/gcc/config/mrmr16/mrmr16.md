@@ -25,7 +25,15 @@
 (include "predicates.md")
 
 ; Most instructions are two bytes long.
-(define_attr "length" "" (const_int 2))
+(define_attr "length" "" (const_int 1))
+
+
+
+
+;; CONSTANT
+(define_constants
+  [(CC_REG 11)])
+
 
 ;; -------------------------------------------------------------------------
 ;; nop instruction
@@ -40,138 +48,139 @@
 ;; Arithmetic instructions
 ;; -------------------------------------------------------------------------
 
-(define_insn "addhi3"
-    [(set (match_operand:HI 0 "register_operand" "=r,r")
-	  (plus:HI
-	   (match_operand:HI 1 "register_operand" "0,r")
-	   (match_operand:HI 2 "mrmr16_add_sub_inc_dec_operand" "k,r")))]
+(define_insn "addqi3"
+    [(set (match_operand:QI 0 "register_operand" "=r,r")
+	  (plus:QI
+	   (match_operand:QI 1 "register_operand" "0,0")
+	   (match_operand:QI 2 "mrmr16_add_operand" "r,i")))]
            ""
            "@
-           inc\\t%0
-           add\\t%0 %1 %2"
+           ADD\\t%0 %2
+           ADD\\t%0 %2"
 	   [])
 
-(define_insn "subhi3"
-    [(set (match_operand:HI 0 "register_operand" "=r,r")
-	  (minus:HI
-	   (match_operand:HI 1 "register_operand" "0,r")
-	   (match_operand:HI 2 "mrmr16_add_sub_inc_dec_operand" "k,r")))]
+(define_insn "subqi3"
+    [(set (match_operand:QI 0 "register_operand" "=r,r")
+	  (minus:QI
+	   (match_operand:QI 1 "register_operand" "0,0")
+	   (match_operand:QI 2 "mrmr16_add_operand" "r,i")))]
            ""
            "@
-           dec\\t%0
-           sub\\t%0 %1 %2"
+           SUB\\t%0 %2
+           SUB\\t%0 %2"
 	   [])
 
-(define_insn "mulhi3"
-    [(set (match_operand:HI 0 "register_operand" "=r")
-	  (mult:HI
-	   (match_operand:HI 1 "register_operand" "r")
-	   (match_operand:HI 2 "register_operand" "r")))]
-	   ""
-	   "mul\\t%0 %1 %2")
-
-(define_insn "divhi3"
-    [(set (match_operand:HI 0 "register_operand" "=r")
-	  (div:HI
-	   (match_operand:HI 1 "register_operand" "r")
-	   (match_operand:HI 2 "register_operand" "r")))]
-	   ""
-	   "div\\t%0 %1 %2")
-
-(define_insn "ashlhi3"
-    [(set (match_operand:HI 0 "register_operand" "=r")
-	  (ashift:HI
-	   (match_operand:HI 1 "register_operand" "r")
-	   (match_operand:HI 2 "register_operand" "r")))]
+(define_insn "ashlqi3"
+    [(set (match_operand:QI 0 "register_operand" "=r")
+	  (ashift:QI
+	   (match_operand:QI 1 "register_operand" "0")
+	   (match_operand:QI 2 "immediate_operand" "i")))]
            ""
-           "sll\\t%0 %1 %2")
+           "SL0\\t%0 %2")
 
-(define_insn "ashrhi3"
-    [(set (match_operand:HI 0 "register_operand" "=r")
-	  (ashiftrt:HI
-	   (match_operand:HI 1 "register_operand" "r")
-	   (match_operand:HI 2 "register_operand" "r")))]
+(define_insn "ashrqi3"
+    [(set (match_operand:QI 0 "register_operand" "=r")
+	  (ashiftrt:QI
+	   (match_operand:QI 1 "register_operand" "0")
+	   (match_operand:QI 2 "immediate_operand" "i")))]
            ""
-           "srl\\t%0 %1 %2")
+           "SR0\\t%0 %2")
 
-;; -------------------------------------------------------------------------
-;; Unary arithmetic instructions
-;; -------------------------------------------------------------------------
+(define_insn "rotlqi3"
+    [(set (match_operand:QI 0 "register_operand" "=r")
+	  (ashift:QI
+	   (match_operand:QI 1 "register_operand" "0")
+	   (match_operand:QI 2 "immediate_operand" "i")))]
+           ""
+           "ROL\\t%0 %2")
 
-(define_insn "one_cmplhi2"
-    [(set (match_operand:HI 0 "register_operand" "=r")
-	  (not:HI (match_operand:HI 1 "register_operand" "r")))]
-          ""
-          "not\\t%0 %1")
+(define_insn "rotrqi3"
+    [(set (match_operand:QI 0 "register_operand" "=r")
+	  (ashiftrt:QI
+	   (match_operand:QI 1 "register_operand" "0")
+	   (match_operand:QI 2 "immediate_operand" "i")))]
+           ""
+           "ROR\\t%0 %2")
+
 
 ;; -------------------------------------------------------------------------
 ;; Logical operators
 ;; -------------------------------------------------------------------------
 
-(define_insn "andhi3"
-    [(set (match_operand:HI 0 "register_operand" "=r")
-	  (and:HI (match_operand:HI 1 "register_operand" "r")
-		  (match_operand:HI 2 "register_operand" "r")))]
+(define_insn "andqi3"
+    [(set (match_operand:QI 0 "register_operand" "=r,r")
+	  (and:QI (match_operand:QI 1 "register_operand" "0,0")
+		  (match_operand:QI 2 "mrmr16_add_operand" "r,i")))]
                   ""
-                  {
-                  return "and\\t%0 %1 %2";
-                  })
+                  "@
+                  AND\\t%0 %2
+                  AND\\t%0 %2"
+            [])
 
-(define_insn "xorhi3"
-    [(set (match_operand:HI 0 "register_operand" "=r")
-	  (xor:HI (match_operand:HI 1 "register_operand" "r")
-		  (match_operand:HI 2 "register_operand" "r")))]
+(define_insn "xorqi3"
+    [(set (match_operand:QI 0 "register_operand" "=r,r")
+	  (xor:QI (match_operand:QI 1 "register_operand" "0,0")
+		  (match_operand:QI 2 "mrmr16_add_operand" "r,i")))]
                   ""
-                  {
-                  return "xor\\t%0 %1 %2";
-                  })
+                  "@
+                  XOR\\t%0 %2
+                  XOR\\t%0 %2"
+            [])
 
-(define_insn "iorhi3"
-    [(set (match_operand:HI 0 "register_operand" "=r")
-	  (ior:HI (match_operand:HI 1 "register_operand" "r")
-		  (match_operand:HI 2 "register_operand" "r")))]
+(define_insn "iorqi3"
+    [(set (match_operand:QI 0 "register_operand" "=r,r")
+	  (ior:QI (match_operand:QI 1 "register_operand" "0,0")
+		  (match_operand:QI 2 "mrmr16_add_operand" "r,i")))]
                   ""
-                  {
-                  return "or\\t%0 %1 %2";
-                  })
+                  "@
+                  OR\\t%0 %2
+                  OR\\t%0 %2"
+            [])
+
 
 ;; -------------------------------------------------------------------------
 ;; Move instructions
 ;; -------------------------------------------------------------------------
 
-(define_insn "movhi_push"
-    [(set (mem:HI (pre_dec:HI (reg:HI 1)))
-  	  (match_operand:HI 0 "register_operand" "r"))]
-          ""
-          "push\\t%0")
+;; We don't add SP as an operand that is going to be changed by the operation as we always call the
+;; mrmr16_decrease_sp() or the mrmr16_decrease_sp() in the prologe/epiloge before the push/pop defined here.
 
-(define_insn "movhi_pop"
-    [(set (match_operand:HI 1 "register_operand" "=r")
-  	  (mem:HI (post_inc:HI (match_operand:HI 0 "register_operand" "r"))))]
+(define_insn "movqi_push"
+    [(set (mem:QI (reg:QI 1))
+  	  (match_operand:QI 0 "register_operand" "r"))]
           ""
-          "pop\\t%1")
+          "STORE\\tSP %0")
 
-(define_expand "movhi"
-    [(set (match_operand:HI 0 "nonimmediate_operand" "")
-	  (match_operand:HI 1 "mrmr16_general_movsrc_operand" ""))]
+(define_insn "movqi_pop"
+    [(set (match_operand:QI 1 "register_operand" "=r")
+  	  (mem:QI (match_operand:QI 0 "register_operand" "r")))]
+          ""
+          "LOAD\\t%1 SP")
+
+(define_expand "movqi"
+    [(set (match_operand:QI 0 "nonimmediate_operand" "")
+	  (match_operand:QI 1 "mrmr16_general_movsrc_operand" ""))]
 	  ""
 	  "")
 
-(define_insn "movhi_internal"
-    [(set (match_operand:HI 0 "nonimmediate_operand" "=r,r,r,r,W")
-          (match_operand:HI 1 "mrmr16_general_movsrc_operand" "r,i,Y,W,r"))]
+(define_insn "movqi_internal"
+    [(set (match_operand:QI 0 "nonimmediate_operand" "=r,r,r,r,r,r,W,Y")
+          (match_operand:QI 1 "mrmr16_general_movsrc_operand" "r,i,Y,W,i,Y,r,r"))]
           ""
           "@
-          mov\\t%0 %1
-          ldi\\t%0 %1
-          ldi\\t%0 %1
-          ld\\t%0 %1
-          st\\t%0 %1"
-          [(set_attr "length" "2,4,4,2,2")])
+          MOV\\t%0 %1
+          MOVi\\t%0 %1
+          MOVi\\t%0 %1
+          LOAD\\t%0 %1
+          LOADi\\t%0 %1
+          LOADi\\t%0 %1
+          STORE\\t%0 %1
+          STOREi\\t%0 %1"
+          [])
 
 (define_split
-    [(set (match_operand:HI 0 "nonimmediate_operand" "")
-	  (match_operand:HI 1 "mrmr16_general_movsrc_operand" ""))]
+    [(set (match_operand:QI 0 "nonimmediate_operand" "")
+	  (match_operand:QI 1 "mrmr16_general_movsrc_operand" ""))]
 	  "
           ((GET_CODE (operands[0]) == MEM) && (GET_CODE (XEXP (operands[0], 0)) == SYMBOL_REF)) ||
           ((GET_CODE (operands[1]) == MEM) && (GET_CODE (XEXP (operands[1], 0)) == SYMBOL_REF)) ||
@@ -184,12 +193,13 @@
 	    DONE;
 	  })
 
+
 ;; -------------------------------------------------------------------------
 ;; Call and Jump instructions
 ;; -------------------------------------------------------------------------
 
 (define_expand "call"
-    [(call (match_operand:HI 0 "memory_operand" "")
+    [(call (match_operand:QI 0 "memory_operand" "")
 	   (match_operand 1 "general_operand" ""))]
            ""
            {
@@ -197,24 +207,24 @@
            })
 
 (define_insn "*call"
-    [(call (mem:HI (match_operand:HI
+    [(call (mem:QI (match_operand:QI
 		    0 "nonmemory_operand" "i,r"))
 	   (match_operand 1 "" ""))]
            ""
            "@
-           call\\t%0
-           callr\\t%0"
-           [(set_attr "length"	"4,2")])
+           JSR\\t%0
+           JSR\\t%0"
+           [])
 
 (define_insn "indirect_jump"
-    [(set (pc) (match_operand:HI 0 "nonimmediate_operand" "r"))]
+    [(set (pc) (match_operand:QI 0 "nonimmediate_operand" "r"))]
     ""
-    "jmpr\\t%0")
+    "JMP\\t%0")
 
 (define_insn "jump"
     [(set (pc) (label_ref (match_operand 0 "" "")))]
     ""
-    "jmp\\t%l0")
+    "JMP\\t%l0")
 
 ;; -------------------------------------------------------------------------
 ;; Compare instructions
@@ -223,11 +233,11 @@
 (define_constants
   [(CC_REG 11)])
 
-(define_expand "cbranchhi4"
+(define_expand "cbranchqi4"
   [(set (reg:CC CC_REG)
         (compare:CC
-         (match_operand:HI 1 "general_operand" "")
-         (match_operand:HI 2 "general_operand" "")))
+         (match_operand:QI 1 "general_operand" "")
+         (match_operand:QI 2 "general_operand" "")))
    (set (pc)
         (if_then_else (match_operator 0 "comparison_operator"
                        [(reg:CC CC_REG) (const_int 0)])
@@ -237,29 +247,29 @@
   "
   /* Force the compare operands into registers.  */
   if (GET_CODE (operands[1]) != REG)
-	operands[1] = force_reg (HImode, operands[1]);
+	operands[1] = force_reg (QImode, operands[1]);
   if (GET_CODE (operands[2]) != REG)
-	operands[2] = force_reg (HImode, operands[2]);
+	operands[2] = force_reg (QImode, operands[2]);
   ")
 
-(define_insn "*cmphi"
+(define_insn "*cmpqi"
   [(set (reg:CC CC_REG)
 	(compare
-	 (match_operand:HI 0 "register_operand" "r")
-	 (match_operand:HI 1 "register_operand"	"r")))]
+	 (match_operand:QI 0 "register_operand" "r")
+	 (match_operand:QI 1 "register_operand"	"r")))]
   ""
-  "cmp\\t%0 %1")
+  "CMP\\t%0 %1")
 
 ;; -------------------------------------------------------------------------
 ;; Branch instructions
 ;; -------------------------------------------------------------------------
 
 (define_code_iterator cond [ne eq lt ltu gt gtu ge le geu leu])
-(define_code_attr CC [(ne "ne") (eq "eq") (lt "lt") (ltu "ltu")
-		      (gt "gt") (gtu "gtu") (ge "ge") (le "le")
-		      (geu "geu") (leu "leu") ])
+(define_code_attr CC [(ne "JNZ") (eq "JZ") (lt "JL") (ltu "JC")
+		      (gt "JH") (gtu "JG") (ge "JHE") (le "JLE")
+		      (geu "JNC") (leu "JSE") ])
 
-(define_insn "*b<cond:code>"
+(define_insn "*<cond:code>"
   [(set (pc)
 	(if_then_else (cond (reg:CC CC_REG)
 			    (const_int 0))
@@ -267,8 +277,9 @@
 		      (pc)))]
   ""
 {
-  return "b<CC>\\t%l0";
+  return "<CC>\\t%l0";
 })
+
 
 ;; -------------------------------------------------------------------------
 ;; Prologue & Epilogue
@@ -297,7 +308,7 @@
 (define_insn "ret"
     [(return)]
     "reload_completed"
-    "ret")
+    "RTS")
 
 ;; -------------------------------------------------------------------------
 ;; Interrupt related instructions
@@ -313,17 +324,17 @@
     [(return)
     (unspec_volatile [(const_int 0)] UNSPECV_IRET)]
     ""
-    "iret")
+    "RTI")
 
 (define_insn "sti"
     [(unspec_volatile [(const_int 0)] UNSPECV_STI)]
     ""
-    "sti")
+    "STI")
 
 (define_insn "cli"
     [(unspec_volatile [(const_int 0)] UNSPECV_CLI)]
     ""
-    "cli")
+    "CLI")
 
 ;; Local Variables:
 ;; mode: lisp

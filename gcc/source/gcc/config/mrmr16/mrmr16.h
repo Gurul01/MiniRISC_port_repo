@@ -31,34 +31,34 @@
 
 /* Number of storage units in a word; normally the size of a
    general-purpose register, a power of two from 1 or 8.  */
-#define UNITS_PER_WORD 2
+#define UNITS_PER_WORD 1
 
 /* Width of a pointer, in bits. You must specify a value no wider than the width of Pmode.
    If it is not equal to the width of Pmode, you must define POINTERS_EXTEND_UNSIGNED.
    If you do not specify a value the default is BITS_PER_WORD. */
-#define POINTER_SIZE 16
+#define POINTER_SIZE 8
 
 /* Normal alignment required for function parameters on the stack, in
    bits.  All stack parameters receive at least this much alignment
    regardless of data type.  */
-#define PARM_BOUNDARY 32
+#define PARM_BOUNDARY 8
 
 /* Define this macro to the minimum alignment enforced by hardware
    for the stack pointer on this machine.  The definition is a C
    expression for the desired alignment (measured in bits).  */
-#define STACK_BOUNDARY 32
+#define STACK_BOUNDARY 8
 
 /* Alignment required for a function entry point, in bits.  */
-#define FUNCTION_BOUNDARY 16
+#define FUNCTION_BOUNDARY 8
 
 /* Alignment of field after `int : 0' in a structure.  */
-#define EMPTY_FIELD_BOUNDARY 32
+#define EMPTY_FIELD_BOUNDARY 8
 
 /* No data type wants to be aligned rounder than this.  */
-#define BIGGEST_ALIGNMENT 32
+#define BIGGEST_ALIGNMENT 8
 
 /* The best alignment to use in cases where we have a choice.  */
-#define FASTEST_ALIGNMENT 32
+#define FASTEST_ALIGNMENT 8
 
 /* Every structures size must be a multiple of 8 bits.  */
 #define STRUCTURE_SIZE_BOUNDARY 8
@@ -70,7 +70,7 @@
 
 /* Largest integer machine mode for structures.  If undefined, the default
    is GET_MODE_SIZE(DImode).  */
-#define MAX_FIXED_MODE_SIZE 16
+#define MAX_FIXED_MODE_SIZE 8
 
 /* Make arrays of chars word-aligned for the same reasons.  */
 #define DATA_ALIGNMENT(TYPE, ALIGN)		\
@@ -87,10 +87,10 @@
  * Type Layout
  ******************************************************************************/
 
-#define INT_TYPE_SIZE 16
-#define SHORT_TYPE_SIZE 16
+#define INT_TYPE_SIZE 8
+#define SHORT_TYPE_SIZE 8
 #define LONG_TYPE_SIZE 16
-#define LONG_LONG_TYPE_SIZE 16
+#define LONG_LONG_TYPE_SIZE 32
 
 #define FLOAT_TYPE_SIZE 32
 #define DOUBLE_TYPE_SIZE 64
@@ -448,21 +448,21 @@ enum reg_class
 /* The maximum number of bytes that a single instruction can move
    quickly between memory and registers or between two memory
    locations.  */
-#define MOVE_MAX 2
+#define MOVE_MAX 1
 
 /* All load operations zero extend.  */
 #define LOAD_EXTEND_OP(MEM) ZERO_EXTEND
 
 /* An alias for the machine mode for pointers.  */
-#define Pmode HImode
+#define Pmode QImode
 
 /* An alias for the machine mode used for memory references to
    functions being called, in `call' RTL expressions.  */
-#define FUNCTION_MODE HImode
+#define FUNCTION_MODE QImode
 
 /* An alias for a machine mode name.  This is the machine mode that
    elements of a jump-table should have.  */
-#define CASE_VECTOR_MODE HImode
+#define CASE_VECTOR_MODE QImode
 
 /* Use DWARF 2 debugging information by default.  */
 #define DWARF2_DEBUGGING_INFO

@@ -8,6 +8,7 @@
         "coretypes.h": "c",
         "common-target-def.h": "c",
         "optabs.h": "c",
-        "*.def": "c"
+        "*.def": "c",
+        "ratio": "cpp"
     }
 }

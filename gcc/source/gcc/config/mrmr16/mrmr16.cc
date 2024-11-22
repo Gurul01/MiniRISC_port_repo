@@ -123,13 +123,29 @@ mrmr16_compute_frame (void)
   /* Save callee-saved registers.  */
   for (regno = 0; regno < FIRST_PSEUDO_REGISTER; regno++)
     if (df_regs_ever_live_p (regno) && (! call_used_or_fixed_reg_p (regno)))
-      cfun->machine->callee_saved_reg_size += 2;
+      cfun->machine->callee_saved_reg_size += 1;
 
   cfun->machine->size_for_adjusting_sp =
     crtl->args.pretend_args_size
     + cfun->machine->local_vars_size
     + (ACCUMULATE_OUTGOING_ARGS
        ? (HOST_WIDE_INT) crtl->outgoing_args_size : 0);
+}
+
+static void
+mrmr16_decrease_sp (rtx insn)
+{
+  rtx num = gen_rtx_CONST_INT(QImode, 1);
+  insn = emit_insn (gen_subqi3 (stack_pointer_rtx, stack_pointer_rtx, num));
+	RTX_FRAME_RELATED_P (insn) = 1;
+}
+
+static void
+mrmr16_increase_sp (rtx insn)
+{
+  rtx num = gen_rtx_CONST_INT(QImode, 1);
+  insn = emit_insn (gen_addqi3 (stack_pointer_rtx, stack_pointer_rtx, num));
+	RTX_FRAME_RELATED_P (insn) = 1;
 }
 
 void
@@ -140,7 +156,8 @@ mrmr16_expand_prologue (void)
 
   mrmr16_compute_frame ();
 
-  insn = emit_insn (gen_movhi_push (hard_frame_pointer_rtx));
+  mrmr16_decrease_sp(insn);
+  insn = emit_insn (gen_movqi_push (hard_frame_pointer_rtx));
   RTX_FRAME_RELATED_P (insn) = 1;
   insn = emit_move_insn (hard_frame_pointer_rtx, stack_pointer_rtx);
   RTX_FRAME_RELATED_P (insn) = 1;
@@ -154,7 +171,8 @@ mrmr16_expand_prologue (void)
       if (df_regs_ever_live_p (regno)
 	  && !call_used_or_fixed_reg_p (regno))
 	{
-	  insn = emit_insn (gen_movhi_push (gen_rtx_REG (Pmode, regno)));
+    mrmr16_decrease_sp(insn);
+	  insn = emit_insn (gen_movqi_push (gen_rtx_REG (Pmode, regno)));
 	  RTX_FRAME_RELATED_P (insn) = 1;
 	}
     }
@@ -164,10 +182,10 @@ mrmr16_expand_prologue (void)
       int i = cfun->machine->size_for_adjusting_sp;
       while ((i >= 255) && (i <= 510))
 	{
-          rtx reg = gen_rtx_REG (HImode, MRMR16_R5);
+          rtx reg = gen_rtx_REG (QImode, MRMR16_R5);
           insn = emit_move_insn (reg, GEN_INT (255));
           RTX_FRAME_RELATED_P (insn) = 1;
-	  insn = emit_insn (gen_subhi3 (stack_pointer_rtx,
+	  insn = emit_insn (gen_subqi3 (stack_pointer_rtx,
 					stack_pointer_rtx,
 					reg));
 	  RTX_FRAME_RELATED_P (insn) = 1;
@@ -175,20 +193,20 @@ mrmr16_expand_prologue (void)
 	}
       if (i <= 255)
 	{
-          rtx reg = gen_rtx_REG (HImode, MRMR16_R5);
+          rtx reg = gen_rtx_REG (QImode, MRMR16_R5);
           insn = emit_move_insn (reg, GEN_INT (i));
           RTX_FRAME_RELATED_P (insn) = 1;
-	  insn = emit_insn (gen_subhi3 (stack_pointer_rtx,
+	  insn = emit_insn (gen_subqi3 (stack_pointer_rtx,
 					stack_pointer_rtx,
 					reg));
 	  RTX_FRAME_RELATED_P (insn) = 1;
 	}
       else
 	{
-	  rtx reg = gen_rtx_REG (HImode, MRMR16_R5);
+	  rtx reg = gen_rtx_REG (QImode, MRMR16_R5);
 	  insn = emit_move_insn (reg, GEN_INT (i));
 	  RTX_FRAME_RELATED_P (insn) = 1;
-	  insn = emit_insn (gen_subhi3 (stack_pointer_rtx,
+	  insn = emit_insn (gen_subqi3 (stack_pointer_rtx,
 					stack_pointer_rtx,
 					reg));
 	  RTX_FRAME_RELATED_P (insn) = 1;
@@ -208,10 +226,10 @@ mrmr16_expand_epilogue (void)
       int i = cfun->machine->size_for_adjusting_sp;
       while ((i >= 255) && (i <= 510))
       {
-          reg = gen_rtx_REG (HImode, MRMR16_R5);
+          reg = gen_rtx_REG (QImode, MRMR16_R5);
           insn = emit_move_insn (reg, GEN_INT (255));
           RTX_FRAME_RELATED_P (insn) = 1;
-	  insn = emit_insn (gen_addhi3 (stack_pointer_rtx,
+	  insn = emit_insn (gen_addqi3 (stack_pointer_rtx,
 					stack_pointer_rtx,
 					reg));
 	  RTX_FRAME_RELATED_P (insn) = 1;
@@ -219,20 +237,20 @@ mrmr16_expand_epilogue (void)
       }
       if (i <= 255)
       {
-          reg = gen_rtx_REG (HImode, MRMR16_R5);
+          reg = gen_rtx_REG (QImode, MRMR16_R5);
           insn = emit_move_insn (reg, GEN_INT (i));
           RTX_FRAME_RELATED_P (insn) = 1;
-	  insn = emit_insn (gen_addhi3 (stack_pointer_rtx,
+	  insn = emit_insn (gen_addqi3 (stack_pointer_rtx,
 					stack_pointer_rtx,
 					reg));
 	  RTX_FRAME_RELATED_P (insn) = 1;
       }
       else
       {
-	  reg = gen_rtx_REG (HImode, MRMR16_R5);
+	  reg = gen_rtx_REG (QImode, MRMR16_R5);
 	  insn = emit_move_insn (reg, GEN_INT (i));
 	  RTX_FRAME_RELATED_P (insn) = 1;
-	  insn = emit_insn (gen_addhi3 (stack_pointer_rtx,
+	  insn = emit_insn (gen_addqi3 (stack_pointer_rtx,
 					stack_pointer_rtx,
 					reg));
 	  RTX_FRAME_RELATED_P (insn) = 1;
@@ -247,13 +265,15 @@ mrmr16_expand_epilogue (void)
 	    && df_regs_ever_live_p (regno))
 	  {
 	    rtx preg = gen_rtx_REG (Pmode, regno);
-	    emit_insn (gen_movhi_pop (reg, preg));
+	    emit_insn (gen_movqi_pop (reg, preg));
+      mrmr16_increase_sp(insn);
 	  }
     }
 
   emit_move_insn (stack_pointer_rtx, hard_frame_pointer_rtx);
   reg = gen_rtx_REG (Pmode, MRMR16_R5);
-  emit_insn (gen_movhi_pop (reg, hard_frame_pointer_rtx));
+  emit_insn (gen_movqi_pop (reg, hard_frame_pointer_rtx));
+  mrmr16_increase_sp(insn);
 
   if (cfun->machine->interrupt_handler_p)
     emit_jump_insn (gen_iret ());
@@ -385,19 +405,19 @@ mrmr16_setup_incoming_varargs (cumulative_args_t cum_v,
   int regno;
   int regs = 6 - *cum;
 
-  *pretend_size = regs < 0 ? 0 : GET_MODE_SIZE (HImode) * regs;
+  *pretend_size = regs < 0 ? 0 : GET_MODE_SIZE (QImode) * regs;
 
   if (no_rtl)
     return;
 
   for (regno = *cum; regno < 6; regno++)
     {
-      rtx reg = gen_rtx_REG (HImode, regno);
+      rtx reg = gen_rtx_REG (QImode, regno);
       rtx slot = gen_rtx_PLUS (Pmode,
-                               gen_rtx_REG (HImode, ARG_POINTER_REGNUM),
+                               gen_rtx_REG (QImode, ARG_POINTER_REGNUM),
                                GEN_INT (UNITS_PER_WORD * (3 + (regno-2))));
 
-      emit_move_insn (gen_rtx_MEM (HImode, slot), reg);
+      emit_move_insn (gen_rtx_MEM (QImode, slot), reg);
     }
 }
 
@@ -482,9 +502,9 @@ mrmr16_split_symbolic_move (rtx dst, rtx src)
       ((GET_CODE (XEXP (dst, 0)) == SYMBOL_REF) ||
        (GET_CODE (XEXP (dst, 0)) == CONST)))
     {
-      rtx temp = gen_rtx_REG (HImode, MRMR16_R5);
+      rtx temp = gen_rtx_REG (QImode, MRMR16_R5);
       emit_move_insn (temp, XEXP (dst, 0));
-      emit_move_insn (gen_rtx_MEM (HImode, temp), src);
+      emit_move_insn (gen_rtx_MEM (QImode, temp), src);
     }
 
   if ((GET_CODE (src) == MEM) &&
@@ -492,7 +512,7 @@ mrmr16_split_symbolic_move (rtx dst, rtx src)
        (GET_CODE (XEXP (src, 0)) == CONST)))
     {
       emit_move_insn (dst, XEXP (src, 0));
-      emit_move_insn (dst, gen_rtx_MEM (HImode, dst));
+      emit_move_insn (dst, gen_rtx_MEM (QImode, dst));
     }
 }
 
