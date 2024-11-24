@@ -22,5 +22,5 @@ extern void  mrmr16_expand_epilogue (void);
 extern int   mrmr16_initial_elimination_offset (int, int);
 extern bool  mrmr16_offset_address_p (rtx);
 extern void  mrmr16_split_symbolic_move (rtx, rtx);
-extern void  mrmr16_push_emit (rtx, rtx, int);
-extern void  mrmr16_pop_emit (rtx, rtx, int);
+extern void  mrmr16_push_emit (rtx, rtx);
+extern void  mrmr16_pop_emit (rtx, rtx);

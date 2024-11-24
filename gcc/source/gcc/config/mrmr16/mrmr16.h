@@ -229,7 +229,7 @@ enum reg_class
 /* Offset from the argument pointer register to the first argument's
    address.  On some machines it may depend on the data type of the
    function.  */
-#define FIRST_PARM_OFFSET(F) 1
+#define FIRST_PARM_OFFSET(F) 2
 
 /* A C expression whose value is RTL representing the location of the
    incoming return address at the beginning of any function, before

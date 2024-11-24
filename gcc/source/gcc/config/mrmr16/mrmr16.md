@@ -151,8 +151,7 @@
     ""
     {
       rtx insn;
-      int in_frame_build = 0;
-      mrmr16_push_emit (operands[0], insn, in_frame_build);
+      mrmr16_push_emit (operands[0], insn);
       DONE;
     })
 
@@ -162,8 +161,7 @@
     ""
     {
       rtx insn;
-      int in_frame_build = 0;
-      mrmr16_pop_emit (operands[1], insn, in_frame_build);
+      mrmr16_pop_emit (operands[1], insn);
       DONE;
     })
 
