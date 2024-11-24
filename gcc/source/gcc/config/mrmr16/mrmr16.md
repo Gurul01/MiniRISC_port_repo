@@ -145,17 +145,27 @@
 ;; We don't add SP as an operand that is going to be changed by the operation as we always call the
 ;; mrmr16_decrease_sp() or the mrmr16_decrease_sp() in the prologe/epiloge before the push/pop defined here.
 
-(define_insn "movqi_push"
+(define_expand "movqi_push"
     [(set (mem:QI (reg:QI 1))
   	  (match_operand:QI 0 "register_operand" "r"))]
-          ""
-          "STORE\\tSP %0")
+    ""
+    {
+      rtx insn;
+      int in_frame_build = 0;
+      mrmr16_push_emit (operands[0], insn, in_frame_build);
+      DONE;
+    })
 
-(define_insn "movqi_pop"
+(define_expand "movqi_pop"
     [(set (match_operand:QI 1 "register_operand" "=r")
   	  (mem:QI (match_operand:QI 0 "register_operand" "r")))]
-          ""
-          "LOAD\\t%1 SP")
+    ""
+    {
+      rtx insn;
+      int in_frame_build = 0;
+      mrmr16_pop_emit (operands[1], insn, in_frame_build);
+      DONE;
+    })
 
 (define_expand "movqi"
     [(set (match_operand:QI 0 "nonimmediate_operand" "")
@@ -177,6 +187,13 @@
           STORE\\t%0 %1
           STOREi\\t%0 %1"
           [])
+
+;;(define_insn "movqi_storei"
+;;    [(set (match_operand:QI 0 "immediate_operand" "i")
+;;          (match_operand:QI 1 "mrmr16_general_movsrc_operand" "r"))]
+;;          ""
+;;          "STOREi\\t%0 %1"
+;;          [])
 
 (define_split
     [(set (match_operand:QI 0 "nonimmediate_operand" "")

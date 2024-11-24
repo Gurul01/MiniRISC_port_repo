@@ -45,6 +45,8 @@
 /* This file should be included last.  */
 #include "target-def.h"
 
+void mrmr16_split_symbolic_move (rtx, rtx);
+
 /* Per-function machine data.  */
 struct GTY(()) machine_function
 {
@@ -133,19 +135,74 @@ mrmr16_compute_frame (void)
 }
 
 static void
-mrmr16_decrease_sp (rtx insn)
+mrmr16_decrease_sp (rtx insn, int in_frame_build)
 {
   rtx num = gen_rtx_CONST_INT(QImode, 1);
   insn = emit_insn (gen_subqi3 (stack_pointer_rtx, stack_pointer_rtx, num));
-	RTX_FRAME_RELATED_P (insn) = 1;
+  if(in_frame_build == 1)
+	  RTX_FRAME_RELATED_P (insn) = 1;
 }
 
 static void
-mrmr16_increase_sp (rtx insn)
+mrmr16_increase_sp (rtx insn, int in_frame_build)
 {
   rtx num = gen_rtx_CONST_INT(QImode, 1);
   insn = emit_insn (gen_addqi3 (stack_pointer_rtx, stack_pointer_rtx, num));
-	RTX_FRAME_RELATED_P (insn) = 1;
+	if(in_frame_build == 1)
+	  RTX_FRAME_RELATED_P (insn) = 1;
+}
+
+void
+mrmr16_push_emit (rtx reg_to_push_from, rtx insn = NULL, int in_frame_build = 0)
+{
+  rtx reg_sp = gen_rtx_REG (QImode, MRMR16_SP);
+  rtx dst = reg_sp;
+  rtx src = reg_to_push_from;
+
+  mrmr16_decrease_sp (insn, in_frame_build);
+
+  // if (((GET_CODE (dst) == MEM) &&
+    //  ((GET_CODE (XEXP (dst, 0)) == SYMBOL_REF) ||
+      // (GET_CODE (XEXP (dst, 0)) == CONST)))    ||
+    // ((GET_CODE (src) == MEM) &&
+    //  ((GET_CODE (XEXP (src, 0)) == SYMBOL_REF) ||
+      // (GET_CODE (XEXP (src, 0)) == CONST))))
+  // {
+    // 
+    // mrmr16_split_symbolic_move (dst, src);
+  // }
+  // else
+  // {
+    insn = emit_move_insn (gen_rtx_MEM (QImode, reg_sp), reg_to_push_from);
+    //emit_insn (gen_movqi_internal  (gen_rtx_MEM (QImode, reg_sp), reg_to_push_from));
+    
+  // }
+}
+
+void
+mrmr16_pop_emit (rtx reg_to_pop_to, rtx insn = NULL, int in_frame_build = 0)
+{
+  rtx reg_sp = gen_rtx_REG (QImode, MRMR16_SP);
+  rtx dst = reg_to_pop_to;
+  rtx src = reg_sp;
+
+// if (((GET_CODE (dst) == MEM) &&
+//      ((GET_CODE (XEXP (dst, 0)) == SYMBOL_REF) ||
+//       (GET_CODE (XEXP (dst, 0)) == CONST)))    ||
+//     ((GET_CODE (src) == MEM) &&
+//      ((GET_CODE (XEXP (src, 0)) == SYMBOL_REF) ||
+//       (GET_CODE (XEXP (src, 0)) == CONST))))
+//   {
+    
+//     mrmr16_split_symbolic_move (dst, src);
+//   }
+//   else
+//   {
+    insn = emit_move_insn (reg_to_pop_to, gen_rtx_MEM (QImode, reg_sp));
+    //emit_insn (gen_movqi_internal  (reg_to_pop_to, gen_rtx_MEM (QImode, reg_sp)));
+  // }
+
+  mrmr16_increase_sp (insn, in_frame_build);
 }
 
 void
@@ -156,9 +213,10 @@ mrmr16_expand_prologue (void)
 
   mrmr16_compute_frame ();
 
-  mrmr16_decrease_sp(insn);
-  insn = emit_insn (gen_movqi_push (hard_frame_pointer_rtx));
-  RTX_FRAME_RELATED_P (insn) = 1;
+  //mrmr16_decrease_sp(insn);
+  //insn = emit_insn (gen_movqi_push (hard_frame_pointer_rtx));
+  mrmr16_push_emit(hard_frame_pointer_rtx, insn, 1);
+  //RTX_FRAME_RELATED_P (insn) = 1;
   insn = emit_move_insn (hard_frame_pointer_rtx, stack_pointer_rtx);
   RTX_FRAME_RELATED_P (insn) = 1;
 
@@ -171,9 +229,10 @@ mrmr16_expand_prologue (void)
       if (df_regs_ever_live_p (regno)
 	  && !call_used_or_fixed_reg_p (regno))
 	{
-    mrmr16_decrease_sp(insn);
-	  insn = emit_insn (gen_movqi_push (gen_rtx_REG (Pmode, regno)));
-	  RTX_FRAME_RELATED_P (insn) = 1;
+    //mrmr16_decrease_sp(insn);
+	  //insn = emit_insn (gen_movqi_push (gen_rtx_REG (Pmode, regno)));
+    mrmr16_push_emit(gen_rtx_REG (Pmode, regno), insn, 1);
+	  //RTX_FRAME_RELATED_P (insn) = 1;
 	}
     }
 
@@ -265,15 +324,17 @@ mrmr16_expand_epilogue (void)
 	    && df_regs_ever_live_p (regno))
 	  {
 	    rtx preg = gen_rtx_REG (Pmode, regno);
-	    emit_insn (gen_movqi_pop (reg, preg));
-      mrmr16_increase_sp(insn);
+	    //emit_insn (gen_movqi_pop (reg, preg));
+      mrmr16_pop_emit (preg, insn, 1);
+      //mrmr16_increase_sp(insn);
 	  }
     }
 
   emit_move_insn (stack_pointer_rtx, hard_frame_pointer_rtx);
   reg = gen_rtx_REG (Pmode, MRMR16_R5);
-  emit_insn (gen_movqi_pop (reg, hard_frame_pointer_rtx));
-  mrmr16_increase_sp(insn);
+  //emit_insn (gen_movqi_pop (reg, hard_frame_pointer_rtx));
+  mrmr16_pop_emit (hard_frame_pointer_rtx, insn, 1);
+  //mrmr16_increase_sp(insn);
 
   if (cfun->machine->interrupt_handler_p)
     emit_jump_insn (gen_iret ());

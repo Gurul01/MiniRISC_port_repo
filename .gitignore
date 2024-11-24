@@ -1,5 +1,6 @@
 /binutils/build/
 /binutils/install/
+/binutils/gas_install/
 /gcc/build/
 /gcc/install/
 /gcc/build_mrmr16/
