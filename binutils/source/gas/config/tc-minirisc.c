@@ -98,7 +98,7 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
     expressionS *first_operand;
     expressionS *second_operand;
    
-    gas_assert(name != 0 && resultP != 0);
+    //gas_assert(name != 0 && resultP != 0);
 
     if( 0 == strcmp(name, "LOAD") || 0 == strcmp(name, "load"))
     {
@@ -388,7 +388,7 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
 /*************************************************************/
 int minirisc_parse_name(const char *name, expressionS *resultP, char *next_char)
 {
-    gas_assert(name != 0 && resultP != 0);
+    //gas_assert(name != 0 && resultP != 0);
 
     if(minirisc_parse_register(name, resultP) != 0)
         return 1;
@@ -412,7 +412,21 @@ void md_begin(void)
     for (int i = 0; i < MINIRISC_NUM_REGISTERS; i++)
     {
         reg_array[i].number = i;
-        sprintf(reg_array[i].name, "r%d", i);
+
+        if(i == (MINIRISC_NUM_REGISTERS-1) - 1)
+        {
+            // Name of the reg before the last one
+            sprintf(reg_array[i].name, "fp");
+        }
+        else if(i == (MINIRISC_NUM_REGISTERS-1))
+        {
+            // Name of the last reg
+            sprintf(reg_array[i].name, "sp");
+        }
+        else
+        {
+            sprintf(reg_array[i].name, "r%d", i);
+        }
 
         (void)symbol_new(reg_array[i].name, reg_section, &zero_address_frag, reg_array[i].number);
     }
@@ -420,7 +434,7 @@ void md_begin(void)
 
 static void minirisc_emit_insn(minirisc_slot_insn *insn, expressionS *whole_instr)
 {
-    gas_assert(insn != 0);
+    //gas_assert(insn != 0);
 
     uint16_t e_insn = 0;
     char *frag = frag_more(MINIRISC_BYTES_SLOT_INSTRUCTION);
@@ -501,9 +515,74 @@ void md_assemble(char *insn_str)
         /********************************************************/
 
     /* Both addressing modes --------------------------------------------------------*/
-        case LOAD: if(whole_instr->X_op == MOV) { opcode = OP_LOAD; }
         case STORE: if(whole_instr->X_op == MOV) { opcode = OP_STORE; }
+            first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
+            second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
+
+            if((first_op->X_op == O_constant) && (second_op->X_op == O_register))
+            {
+                insn->A_type.opcode = opcode;
+                insn->A_type.rX_or_ctrl = second_op->X_add_number;
+                insn->A_type.immed = first_op->X_add_number;
+            }
+            else if((first_op->X_op == O_symbol) && (second_op->X_op == O_register))
+            {
+                insn->A_type.opcode = opcode;
+                insn->A_type.rX_or_ctrl = second_op->X_add_number;
+                //insn->A_type.immed = first_op->X_add_symbol;
+            }
+            else if((first_op->X_op == O_register) && (second_op->X_op == O_register))
+            {
+                insn->B_type.prefix = OP_B_TYPE_PREFIX;
+                insn->B_type.rX_or_ctrl = second_op->X_add_number;
+                insn->B_type.opcode = opcode;
+                insn->B_type.rY_or_ctrl = first_op->X_add_number;
+            }
+            else
+            {
+                as_bad("STORE usage: first op has to be const or symbol, second op has to be reg");
+                error = 1;
+            }
+
+            break;
+
+        case LOAD: if(whole_instr->X_op == MOV) { opcode = OP_LOAD; }
         case MOV: if(whole_instr->X_op == MOV) { opcode = OP_MOV; }
+            
+
+            first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
+            second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
+
+            if((first_op->X_op == O_register) && (second_op->X_op == O_constant))
+            {
+                insn->A_type.opcode = opcode;
+                insn->A_type.rX_or_ctrl = first_op->X_add_number;
+                insn->A_type.immed = second_op->X_add_number;
+            }
+            else if((first_op->X_op == O_register) && (second_op->X_op == O_symbol))
+            {
+                insn->A_type.opcode = opcode;
+                insn->A_type.rX_or_ctrl = first_op->X_add_number;
+                // Devide by 2 because for some reason in the elf file
+                // one instr counts occupies two addresses:
+                //insn->A_type.immed = S_GET_VALUE(second_op->X_add_symbol); // "/2"
+            }
+            else if((first_op->X_op == O_register) && (second_op->X_op == O_register))
+            {
+                insn->B_type.prefix = OP_B_TYPE_PREFIX;
+                insn->B_type.rX_or_ctrl = first_op->X_add_number;
+                insn->B_type.opcode = opcode;
+                insn->B_type.rY_or_ctrl = second_op->X_add_number;
+            }
+            else
+            {
+                as_bad("%s usage: first op has to be reg, second op has to be either reg or const or symbol", whole_instr->X_op);
+                error = 1;
+            }
+
+            break;
+
+
         case ADD: if(whole_instr->X_op == ADD) { opcode = OP_ADD; }
         case ADC: if(whole_instr->X_op == ADC) { opcode = OP_ADC; }
         case SUB: if(whole_instr->X_op == SUB) { opcode = OP_SUB; }
@@ -514,7 +593,7 @@ void md_assemble(char *insn_str)
         case OR:  if(whole_instr->X_op == OR)  { opcode = OP_OR;  }
         case XOR: if(whole_instr->X_op == XOR) { opcode = OP_XOR; }
         case TST: if(whole_instr->X_op == TST) { opcode = OP_TST; }
-            gas_assert((whole_instr->X_add_symbol != 0) && (whole_instr->X_op_symbol != 0));
+            //gas_assert((whole_instr->X_add_symbol != 0) && (whole_instr->X_op_symbol != 0));
 
             first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
             second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
@@ -547,7 +626,7 @@ void md_assemble(char *insn_str)
 
     /* Only one reg as operand --------------------------------------------------------*/
         case SWP:
-            gas_assert(whole_instr->X_add_symbol != 0);
+            //gas_assert(whole_instr->X_add_symbol != 0);
 
             first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
 
@@ -574,7 +653,7 @@ void md_assemble(char *insn_str)
         case ROR: if(whole_instr->X_op == ROR) { ctrl_field = ROR_CTRL; }
         case RLC: if(whole_instr->X_op == RLC) { ctrl_field = RLC_CTRL; }
         case RRC: if(whole_instr->X_op == RRC) { ctrl_field = RRC_CTRL; }
-            gas_assert(whole_instr->X_add_symbol != 0);
+            //gas_assert(whole_instr->X_add_symbol != 0);
 
             first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
 
@@ -610,7 +689,7 @@ void md_assemble(char *insn_str)
         case JSE: if(whole_instr->X_op == JSE) { ctrl_field = JSE_CTRL; }
         case JG:  if(whole_instr->X_op == JG)  { ctrl_field = JG_CTRL;  }
         case JSR: if(whole_instr->X_op == JSR) { ctrl_field = JSR_CTRL; }
-             gas_assert(whole_instr->X_add_symbol != 0);
+             //gas_assert(whole_instr->X_add_symbol != 0);
 
             first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
 
@@ -735,7 +814,7 @@ arelent *tc_gen_reloc(asection *seg, fixS *fixp)
     arelent *reloc;
     symbolS *sym;
 
-    gas_assert(fixp != 0);
+    //gas_assert(fixp != 0);
 
     reloc = XNEW(arelent);
     reloc->sym_ptr_ptr = XNEW(asymbol*);
