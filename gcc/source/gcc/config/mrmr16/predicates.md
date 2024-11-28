@@ -23,11 +23,12 @@
 
 ;; Nonzero if OP can be source of a simple move operation.
 (define_predicate "mrmr16_general_movsrc_operand"
-  (match_code "mem,const_int,reg,subreg,symbol_ref,label_ref,const")
+  (match_code "mem,const_int,reg,subreg,symbol_ref,const")
 {
   /* Any (MEM LABEL_REF) is OK.  That is a pc-relative load.  */
-  if (MEM_P (op) && GET_CODE (XEXP (op, 0)) == LABEL_REF)
-    return 1;
+
+  if (GET_CODE (op) == PC)
+    return 0;
 
   if (MEM_P (op) && GET_CODE (XEXP (op, 0)) == SYMBOL_REF)
     return 1;
@@ -40,6 +41,13 @@
 
   return general_operand (op, mode);
 })
+
+
+(define_predicate "mrmr16_no_pc_operand"
+  (and (match_code "mem,const_int,reg,subreg,symbol_ref,label_ref,const")
+       (match_test "GET_CODE (op) != PC")))
+
+
 
 ;; Nonzero if OP can be an operand to an add/inc/dec instruction.
 (define_predicate "mrmr16_add_operand"

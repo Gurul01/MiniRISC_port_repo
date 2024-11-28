@@ -166,47 +166,51 @@
     })
 
 (define_expand "movqi"
-    [(set (match_operand:QI 0 "nonimmediate_operand" "")
+    [(set (match_operand:QI 0 "mrmr16_no_pc_operand" "")
 	  (match_operand:QI 1 "mrmr16_general_movsrc_operand" ""))]
 	  ""
 	  "")
 
 (define_insn "movqi_internal"
-    [(set (match_operand:QI 0 "nonimmediate_operand" "=r,r,r,r,r,r,W,Y")
-          (match_operand:QI 1 "mrmr16_general_movsrc_operand" "r,i,Y,W,i,Y,r,r"))]
+    [(set (match_operand:QI 0 "" "=Z,Z,Z,Z,Z,Z,Z,Z,W,A,Y,i")
+          (match_operand:QI 1 "mrmr16_general_movsrc_operand" "Z,i,A,Y,W,i,A,Y,Z,Z,Z,Z"))]
           ""
           "@
           MOV\\t%0 %1
-          MOVi\\t%0 %1
-          MOVi\\t%0 %1
+          MOV\\t%0 %1
+          MOV\\t%0 %1
+          MOV\\t%0 %1
           LOAD\\t%0 %1
-          LOADi\\t%0 %1
-          LOADi\\t%0 %1
+          LOAD\\t%0 %1
+          LOAD\\t%0 %1
+          LOAD\\t%0 %1
           STORE\\t%0 %1
-          STOREi\\t%0 %1"
+          STORE\\t%0 %1
+          STORE\\t%0 %1
+          STORE\\t%0 %1"
           [])
 
 ;;(define_insn "movqi_storei"
-;;    [(set (match_operand:QI 0 "immediate_operand" "i")
-;;          (match_operand:QI 1 "mrmr16_general_movsrc_operand" "r"))]
+;;    [(set (match_operand:QI 0 "" "=i")
+;;          (match_operand:QI 1 "" "r"))]
 ;;          ""
 ;;          "STOREi\\t%0 %1"
 ;;          [])
 
-(define_split
-    [(set (match_operand:QI 0 "nonimmediate_operand" "")
-	  (match_operand:QI 1 "mrmr16_general_movsrc_operand" ""))]
-	  "
-          ((GET_CODE (operands[0]) == MEM) && (GET_CODE (XEXP (operands[0], 0)) == SYMBOL_REF)) ||
-          ((GET_CODE (operands[1]) == MEM) && (GET_CODE (XEXP (operands[1], 0)) == SYMBOL_REF)) ||
-          ((GET_CODE (operands[0]) == MEM) && (GET_CODE (XEXP (operands[0], 0)) == CONST)) ||
-          ((GET_CODE (operands[1]) == MEM) && (GET_CODE (XEXP (operands[1], 0)) == CONST))
-          "
-	  [(const_int 0)]
-	  {
-	    mrmr16_split_symbolic_move (operands[0], operands[1]);
-	    DONE;
-	  })
+;;(define_split
+;;    [(set (match_operand:QI 0 "nonimmediate_operand" "")
+;;	  (match_operand:QI 1 "mrmr16_general_movsrc_operand" ""))]
+;;	  "
+;;          ((GET_CODE (operands[0]) == MEM) && (GET_CODE (XEXP (operands[0], 0)) == SYMBOL_REF)) ||
+;;          ((GET_CODE (operands[1]) == MEM) && (GET_CODE (XEXP (operands[1], 0)) == SYMBOL_REF)) ||
+;;          ((GET_CODE (operands[0]) == MEM) && (GET_CODE (XEXP (operands[0], 0)) == CONST)) ||
+;;          ((GET_CODE (operands[1]) == MEM) && (GET_CODE (XEXP (operands[1], 0)) == CONST))
+;;          "
+;;	  [(const_int 0)]
+;;	  {
+;;	    mrmr16_split_symbolic_move (operands[0], operands[1]);
+;;	    DONE;
+;;	  })
 
 
 ;; -------------------------------------------------------------------------

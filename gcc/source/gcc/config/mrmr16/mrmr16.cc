@@ -521,6 +521,15 @@ mrmr16_offset_address_p (rtx x)
   return 0;
 }
 
+bool
+mrmr16_not_pc(rtx x)
+{
+  if( GET_CODE (x) != PC )
+    return 1;
+
+  return 0;
+}
+
 void
 mrmr16_split_symbolic_move (rtx dst, rtx src)
 {

@@ -24,15 +24,15 @@
 (define_constraint "A"
   "An absolute address."
   (and (match_code "mem")
+       (match_test "GET_CODE (XEXP (op, 0)) != PC")
        (ior (match_test "GET_CODE (XEXP (op, 0)) == SYMBOL_REF")
-	    (match_test "GET_CODE (XEXP (op, 0)) == LABEL_REF")
-	    (match_test "GET_CODE (XEXP (op, 0)) == CONST"))))
+	          (match_test "GET_CODE (XEXP (op, 0)) == CONST"))))
 
 (define_constraint "Y"
     "An absolute address."
-  (ior (match_code "symbol_ref")
-       (match_code "label_ref")
-       (match_code "const")))
+  (and (match_test "mrmr16_not_pc(op)")
+       (ior (match_code "symbol_ref")
+            (match_code "const"))))
 
 (define_constraint "B"
   "An offset address."
@@ -43,12 +43,18 @@
   "A register indirect memory operand."
   (and (match_code "mem")
        (match_test "REG_P (XEXP (op, 0))
-		    && REGNO_OK_FOR_BASE_P (REGNO (XEXP (op, 0)))")))
+		    && REGNO_OK_FOR_BASE_P (REGNO (XEXP (op, 0)))
+        && mrmr16_not_pc(op)")))
 
 (define_constraint "O"
   "The constant zero"
   (and (match_code "const_int")
        (match_test "ival == 0")))
+
+(define_constraint "Z"
+  "The non PC"
+  (and (match_code "reg")
+       (match_test "GET_CODE (op) != PC")))
 
 (define_constraint "k"
   "The constant one"

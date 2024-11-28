@@ -24,3 +24,4 @@ extern bool  mrmr16_offset_address_p (rtx);
 extern void  mrmr16_split_symbolic_move (rtx, rtx);
 extern void  mrmr16_push_emit (rtx, rtx);
 extern void  mrmr16_pop_emit (rtx, rtx);
+extern bool  mrmr16_not_pc(rtx x);
