@@ -12,9 +12,9 @@
 enum minirisc_opcode
 {
     // Different meaing in case of A and B (here A and B type are not refering to the last operands type aka reg/const)
-    OP_LDSP_LOAD  = 0b1101,
+    OP_LOAD  = 0b1101,
     // Different meaing in case of A and B (here A and B type are not refering to the last operands type aka reg/const)
-    OP_STSP_STORE = 0b1001,
+    OP_STORE = 0b1001,
     OP_MOV   = 0b1100, 
     OP_ADD   = 0b0000, 
     OP_ADC   = 0b0001, 

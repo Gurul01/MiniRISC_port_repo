@@ -1,2 +1,4 @@
 /binutils/build/
 /binutils/install/
+/gcc/
+/binutils/gas_install/

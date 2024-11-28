@@ -62,7 +62,7 @@ static void minirisc_print_insn(minirisc_slot_insn *insn)
         /********************************************************************************************************************************************/
         switch(insn->B_type.opcode)
         {
-            case OP_LDSP_LOAD: // LOAD instruction
+            case OP_LOAD: // LOAD instruction
                 
                 strcpy(OP_string, "LOAD");
                 rX = insn->B_type.rX_or_ctrl;
@@ -71,16 +71,8 @@ static void minirisc_print_insn(minirisc_slot_insn *insn)
                 sprintf(insn_buf, "%s r%d r%d", OP_string, rX, rY);
                 break;
 
-            case OP_STSP_STORE: //STORE instruction
-                
-                strcpy(OP_string, "STORE");
-                rX = insn->B_type.rX_or_ctrl;
-                rY = insn->B_type.rY_or_ctrl;
-
-                sprintf(insn_buf, "%s r%d r%d", OP_string, rY, rX);
-                break;
-
         /* Both addressing modes --------------------------------------------------------*/
+            case OP_STORE: if(insn->B_type.opcode == OP_STORE) { strcpy(OP_string, "STORE"); }
             case OP_MOV: if(insn->B_type.opcode == OP_MOV) { strcpy(OP_string, "MOV"); }
             case OP_ADD: if(insn->B_type.opcode == OP_ADD) { strcpy(OP_string, "ADD"); }
             case OP_ADC: if(insn->B_type.opcode == OP_ADC) { strcpy(OP_string, "ADC"); }
@@ -177,26 +169,17 @@ static void minirisc_print_insn(minirisc_slot_insn *insn)
             /********************************************************/
 
         /* Only one kind of addressing --------------------------------------------------------*/
-            case OP_LDSP_LOAD: // LDSP instruction
+            case OP_LOAD: // LDSP instruction
                 
-                strcpy(OP_string, "LDSP");
+                strcpy(OP_string, "LOAD");
                 rX  = insn->A_type.rX_or_ctrl;
                 imm = insn->A_type.immed;
 
                 sprintf(insn_buf, "%s r%d %d", OP_string, rX, imm);
                 break;
-
-            case OP_STSP_STORE: // STSP instruction
-
-                strcpy(OP_string, "STSP");
-                rX  = insn->A_type.rX_or_ctrl;
-                imm = insn->A_type.immed;
-
-                sprintf(insn_buf, "%s r%d %d", OP_string, rX, imm);
-                break;
-
 
         /* Both addressing modes --------------------------------------------------------*/
+            case OP_STORE : if(insn->A_type.opcode == OP_STORE) { strcpy(OP_string, "STORE"); }
             case OP_MOV : if(insn->A_type.opcode == OP_MOV) { strcpy(OP_string, "MOV"); }
             case OP_ADD : if(insn->A_type.opcode == OP_ADD) { strcpy(OP_string, "ADD"); }
             case OP_ADC : if(insn->A_type.opcode == OP_ADC) { strcpy(OP_string, "ADC"); }

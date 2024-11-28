@@ -100,15 +100,7 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
    
     gas_assert(name != 0 && resultP != 0);
 
-    if(      0 == strcmp(name, "LDSP") || 0 == strcmp(name, "ldsp"))
-    {
-        opcode = LDSP;
-    }
-    else if( 0 == strcmp(name, "STSP") || 0 == strcmp(name, "stsp"))
-    {
-        opcode = STSP;
-    }
-    else if( 0 == strcmp(name, "LOAD") || 0 == strcmp(name, "load"))
+    if( 0 == strcmp(name, "LOAD") || 0 == strcmp(name, "load"))
     {
         opcode = LOAD;
     }
@@ -285,8 +277,6 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
     switch(opcode)
     {
         // The instructions with two operands
-        case LDSP:
-        case STSP:
         case LOAD:
         case STORE:
         case MOV:
@@ -510,81 +500,9 @@ void md_assemble(char *insn_str)
         /*                     TWO OPERANDS                     */
         /********************************************************/
 
-    /* Only one kind of addressing --------------------------------------------------------*/
-        case LDSP:
-            gas_assert((whole_instr->X_add_symbol != 0) && (whole_instr->X_op_symbol != 0));
-
-            first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
-            second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
-
-            if((first_op->X_op != O_register) || (second_op->X_op != O_constant))
-            {
-                as_bad("LDSP usage: first op has to be reg, second op has to be const");
-                error = 1;
-            }
-
-            insn->A_type.opcode = OP_LDSP_LOAD;
-            insn->A_type.rX_or_ctrl = first_op->X_add_number;
-            insn->A_type.immed = second_op->X_add_number;
-
-            break;
-
-        case STSP:
-            gas_assert((whole_instr->X_add_symbol != 0) && (whole_instr->X_op_symbol != 0));
-
-            first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
-            second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
-
-            if((first_op->X_op != O_constant) || (second_op->X_op != O_register))
-            {
-                as_bad("STSP usage: first op has to be const, second op has to be reg");
-                error = 1;
-            }
-
-            insn->A_type.opcode = OP_STSP_STORE;
-            insn->A_type.rX_or_ctrl = second_op->X_add_number;
-            insn->A_type.immed = first_op->X_add_number;
-
-            break;
-
-        case LOAD:
-            gas_assert((whole_instr->X_add_symbol != 0) && (whole_instr->X_op_symbol != 0));
-
-            first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
-            second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
-
-            if((first_op->X_op != O_register) || (second_op->X_op != O_register))
-            {
-                as_bad("LOAD usage: first op has to be reg, second op has to be reg");
-                error = 1;
-            }
-
-            insn->B_type.prefix = OP_B_TYPE_PREFIX;
-            insn->B_type.rX_or_ctrl = first_op->X_add_number;
-            insn->B_type.opcode = OP_LDSP_LOAD;
-            insn->B_type.rY_or_ctrl = second_op->X_add_number;
-
-            break;
-        case STORE:
-                        gas_assert((whole_instr->X_add_symbol != 0) && (whole_instr->X_op_symbol != 0));
-
-            first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
-            second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
-
-            if((first_op->X_op != O_register) || (second_op->X_op != O_register))
-            {
-                as_bad("STORE usage: first op has to be reg, second op has to be reg");
-                error = 1;
-            }
-
-            insn->B_type.prefix = OP_B_TYPE_PREFIX;
-            insn->B_type.rX_or_ctrl = second_op->X_add_number;
-            insn->B_type.opcode = OP_STSP_STORE;
-            insn->B_type.rY_or_ctrl = first_op->X_add_number;
-
-            break;
-
     /* Both addressing modes --------------------------------------------------------*/
+        case LOAD: if(whole_instr->X_op == MOV) { opcode = OP_LOAD; }
+        case STORE: if(whole_instr->X_op == MOV) { opcode = OP_STORE; }
         case MOV: if(whole_instr->X_op == MOV) { opcode = OP_MOV; }
         case ADD: if(whole_instr->X_op == ADD) { opcode = OP_ADD; }
         case ADC: if(whole_instr->X_op == ADC) { opcode = OP_ADC; }
