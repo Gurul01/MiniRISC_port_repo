@@ -166,14 +166,14 @@
     })
 
 (define_expand "movqi"
-    [(set (match_operand:QI 0 "mrmr16_no_pc_operand" "")
+    [(set (match_operand:QI 0 "" "")
 	  (match_operand:QI 1 "mrmr16_general_movsrc_operand" ""))]
 	  ""
 	  "")
 
 (define_insn "movqi_internal"
-    [(set (match_operand:QI 0 "" "=Z,Z,Z,Z,Z,Z,Z,Z,W,A,Y,i")
-          (match_operand:QI 1 "mrmr16_general_movsrc_operand" "Z,i,A,Y,W,i,A,Y,Z,Z,Z,Z"))]
+    [(set (match_operand:QI 0 "" "=r,r,r,r,r,r,r,r,W,A,Y,i")
+          (match_operand:QI 1 "mrmr16_general_movsrc_operand" "r,i,A,Y,W,i,A,Y,r,r,r,r"))]
           ""
           "@
           MOV\\t%0 %1
@@ -190,12 +190,6 @@
           STORE\\t%0 %1"
           [])
 
-;;(define_insn "movqi_storei"
-;;    [(set (match_operand:QI 0 "" "=i")
-;;          (match_operand:QI 1 "" "r"))]
-;;          ""
-;;          "STOREi\\t%0 %1"
-;;          [])
 
 ;;(define_split
 ;;    [(set (match_operand:QI 0 "nonimmediate_operand" "")

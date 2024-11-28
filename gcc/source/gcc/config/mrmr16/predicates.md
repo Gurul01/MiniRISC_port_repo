@@ -27,9 +27,6 @@
 {
   /* Any (MEM LABEL_REF) is OK.  That is a pc-relative load.  */
 
-  if (GET_CODE (op) == PC)
-    return 0;
-
   if (MEM_P (op) && GET_CODE (XEXP (op, 0)) == SYMBOL_REF)
     return 1;
 
@@ -41,13 +38,6 @@
 
   return general_operand (op, mode);
 })
-
-
-(define_predicate "mrmr16_no_pc_operand"
-  (and (match_code "mem,const_int,reg,subreg,symbol_ref,label_ref,const")
-       (match_test "GET_CODE (op) != PC")))
-
-
 
 ;; Nonzero if OP can be an operand to an add/inc/dec instruction.
 (define_predicate "mrmr16_add_operand"
