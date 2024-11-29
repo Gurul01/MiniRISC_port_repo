@@ -98,17 +98,9 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
     expressionS *first_operand;
     expressionS *second_operand;
    
-    gas_assert(name != 0 && resultP != 0);
+    //gas_assert(name != 0 && resultP != 0);
 
-    if(      0 == strcmp(name, "LDSP") || 0 == strcmp(name, "ldsp"))
-    {
-        opcode = LDSP;
-    }
-    else if( 0 == strcmp(name, "STSP") || 0 == strcmp(name, "stsp"))
-    {
-        opcode = STSP;
-    }
-    else if( 0 == strcmp(name, "LOAD") || 0 == strcmp(name, "load"))
+    if( 0 == strcmp(name, "LOAD") || 0 == strcmp(name, "load"))
     {
         opcode = LOAD;
     }
@@ -131,6 +123,10 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
     else if( 0 == strcmp(name, "SUB")  || 0 == strcmp(name, "sub"))
     {
         opcode = SUB;
+    }
+    else if( 0 == strcmp(name, "CMP")  || 0 == strcmp(name, "cmp"))
+    {
+        opcode = CMP;
     }
     else if( 0 == strcmp(name, "CMC")  || 0 == strcmp(name, "cmc"))
     {
@@ -285,8 +281,6 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
     switch(opcode)
     {
         // The instructions with two operands
-        case LDSP:
-        case STSP:
         case LOAD:
         case STORE:
         case MOV:
@@ -398,7 +392,7 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
 /*************************************************************/
 int minirisc_parse_name(const char *name, expressionS *resultP, char *next_char)
 {
-    gas_assert(name != 0 && resultP != 0);
+    //gas_assert(name != 0 && resultP != 0);
 
     if(minirisc_parse_register(name, resultP) != 0)
         return 1;
@@ -422,7 +416,21 @@ void md_begin(void)
     for (int i = 0; i < MINIRISC_NUM_REGISTERS; i++)
     {
         reg_array[i].number = i;
-        sprintf(reg_array[i].name, "r%d", i);
+
+        if(i == (MINIRISC_NUM_REGISTERS-1) - 1)
+        {
+            // Name of the reg before the last one
+            sprintf(reg_array[i].name, "fp");
+        }
+        else if(i == (MINIRISC_NUM_REGISTERS-1))
+        {
+            // Name of the last reg
+            sprintf(reg_array[i].name, "sp");
+        }
+        else
+        {
+            sprintf(reg_array[i].name, "r%d", i);
+        }
 
         (void)symbol_new(reg_array[i].name, reg_section, &zero_address_frag, reg_array[i].number);
     }
@@ -430,11 +438,10 @@ void md_begin(void)
 
 static void minirisc_emit_insn(minirisc_slot_insn *insn, expressionS *whole_instr)
 {
-    gas_assert(insn != 0);
+    //gas_assert(insn != 0);
 
     uint16_t e_insn = 0;
     char *frag = frag_more(MINIRISC_BYTES_SLOT_INSTRUCTION);
-    bool is_op_ctrl = false;
 
     if((insn->B_type.prefix & 0xF) == OP_B_TYPE_PREFIX)
     {
@@ -451,21 +458,48 @@ static void minirisc_emit_insn(minirisc_slot_insn *insn, expressionS *whole_inst
 
         if(OP_SWP_SHIFT != insn->A_type.opcode)
         {
-            expressionS *addr_expr = symbol_get_value_expression(whole_instr->X_add_symbol);
+            expressionS *addr_expr = NULL;
             int where;
-            
-            know(O_symbol == addr_expr->X_op);
 
-            /*Get the location in the current frag where the fixup is to be inserted*/
-            where = frag - frag_now->fr_literal;
+            if(OP_CTRL == insn->A_type.opcode)
+            {
+                expressionS *addr_expr_first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
+                
+                if(O_symbol == addr_expr_first_op->X_op)
+                    addr_expr = addr_expr_first_op;
+            }
+            else if((OP_MOV == insn->A_type.opcode) || (OP_LOAD == insn->A_type.opcode) || (OP_STORE == insn->A_type.opcode))
+            {
+                expressionS *addr_expr_first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
+                expressionS *addr_expr_second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
 
-            /*Reverse giving '1' as value to the X_add_number so it won't be turned into a const expression */
-            addr_expr->X_add_number = 0;
+                if((O_symbol == addr_expr_first_op->X_op) || (O_symbol == addr_expr_second_op->X_op))
+                {
+                    if((O_symbol == addr_expr_first_op->X_op) && (O_symbol == addr_expr_second_op->X_op))
+                        as_bad("STORE/LOAD: Only one of the operands can be a symbol!");
 
-            (void)fix_new_exp(frag_now, where, 1, addr_expr, 0, BFD_RELOC_8);
+                    if(O_symbol == addr_expr_first_op->X_op)
+                        addr_expr = addr_expr_first_op;
+                    else
+                        addr_expr = addr_expr_second_op;
+                }
+            }
 
-            /*If we had relative relocation for an instruction:*/
-            //(void)fix_new_exp(frag_now, where, 1, addr_expr, 1, BFD_RELOC_MINIRISC_RELATIVE);
+            if(NULL != addr_expr)
+            {
+                know(O_symbol == addr_expr->X_op);
+
+                /*Get the location in the current frag where the fixup is to be inserted*/
+                where = frag - frag_now->fr_literal;
+
+                /*Reverse giving '1' as value to the X_add_number so it won't be turned into a const expression */
+                addr_expr->X_add_number = 0;
+
+                (void)fix_new_exp(frag_now, where, 1, addr_expr, 0, BFD_RELOC_8);
+
+                /*If we had relative relocation for an instruction:*/
+                //(void)fix_new_exp(frag_now, where, 1, addr_expr, 1, BFD_RELOC_MINIRISC_RELATIVE);
+            }
         }   
     }
 
@@ -510,82 +544,75 @@ void md_assemble(char *insn_str)
         /*                     TWO OPERANDS                     */
         /********************************************************/
 
-    /* Only one kind of addressing --------------------------------------------------------*/
-        case LDSP:
-            gas_assert((whole_instr->X_add_symbol != 0) && (whole_instr->X_op_symbol != 0));
-
-            first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
-            second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
-
-            if((first_op->X_op != O_register) || (second_op->X_op != O_constant))
-            {
-                as_bad("LDSP usage: first op has to be reg, second op has to be const");
-                error = 1;
-            }
-
-            insn->A_type.opcode = OP_LDSP_LOAD;
-            insn->A_type.rX_or_ctrl = first_op->X_add_number;
-            insn->A_type.immed = second_op->X_add_number;
-
-            break;
-
-        case STSP:
-            gas_assert((whole_instr->X_add_symbol != 0) && (whole_instr->X_op_symbol != 0));
-
-            first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
-            second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
-
-            if((first_op->X_op != O_constant) || (second_op->X_op != O_register))
-            {
-                as_bad("STSP usage: first op has to be const, second op has to be reg");
-                error = 1;
-            }
-
-            insn->A_type.opcode = OP_STSP_STORE;
-            insn->A_type.rX_or_ctrl = second_op->X_add_number;
-            insn->A_type.immed = first_op->X_add_number;
-
-            break;
-
-        case LOAD:
-            gas_assert((whole_instr->X_add_symbol != 0) && (whole_instr->X_op_symbol != 0));
-
-            first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
-            second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
-
-            if((first_op->X_op != O_register) || (second_op->X_op != O_register))
-            {
-                as_bad("LOAD usage: first op has to be reg, second op has to be reg");
-                error = 1;
-            }
-
-            insn->B_type.prefix = OP_B_TYPE_PREFIX;
-            insn->B_type.rX_or_ctrl = first_op->X_add_number;
-            insn->B_type.opcode = OP_LDSP_LOAD;
-            insn->B_type.rY_or_ctrl = second_op->X_add_number;
-
-            break;
-        case STORE:
-                        gas_assert((whole_instr->X_add_symbol != 0) && (whole_instr->X_op_symbol != 0));
-
-            first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
-            second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
-
-            if((first_op->X_op != O_register) || (second_op->X_op != O_register))
-            {
-                as_bad("STORE usage: first op has to be reg, second op has to be reg");
-                error = 1;
-            }
-
-            insn->B_type.prefix = OP_B_TYPE_PREFIX;
-            insn->B_type.rX_or_ctrl = second_op->X_add_number;
-            insn->B_type.opcode = OP_STSP_STORE;
-            insn->B_type.rY_or_ctrl = first_op->X_add_number;
-
-            break;
-
     /* Both addressing modes --------------------------------------------------------*/
+        case STORE: if(whole_instr->X_op == STORE) { opcode = OP_STORE; }
+            first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
+            second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
+
+            if((first_op->X_op == O_constant) && (second_op->X_op == O_register))
+            {
+                insn->A_type.opcode = opcode;
+                insn->A_type.rX_or_ctrl = second_op->X_add_number;
+                insn->A_type.immed = first_op->X_add_number;
+            }
+            else if((first_op->X_op == O_symbol) && (second_op->X_op == O_register))
+            {
+                insn->A_type.opcode = opcode;
+                insn->A_type.rX_or_ctrl = second_op->X_add_number;
+                //insn->A_type.immed = first_op->X_add_symbol;
+            }
+            else if((first_op->X_op == O_register) && (second_op->X_op == O_register))
+            {
+                insn->B_type.prefix = OP_B_TYPE_PREFIX;
+                insn->B_type.rX_or_ctrl = second_op->X_add_number;
+                insn->B_type.opcode = opcode;
+                insn->B_type.rY_or_ctrl = first_op->X_add_number;
+            }
+            else
+            {
+                as_bad("STORE usage: first op has to be const or symbol, second op has to be reg");
+                error = 1;
+            }
+
+            break;
+
+        case LOAD: if(whole_instr->X_op == LOAD) { opcode = OP_LOAD; }
         case MOV: if(whole_instr->X_op == MOV) { opcode = OP_MOV; }
+            
+
+            first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
+            second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
+
+            if((first_op->X_op == O_register) && (second_op->X_op == O_constant))
+            {
+                insn->A_type.opcode = opcode;
+                insn->A_type.rX_or_ctrl = first_op->X_add_number;
+                insn->A_type.immed = second_op->X_add_number;
+            }
+            else if((first_op->X_op == O_register) && (second_op->X_op == O_symbol))
+            {
+                insn->A_type.opcode = opcode;
+                insn->A_type.rX_or_ctrl = first_op->X_add_number;
+                // Devide by 2 because for some reason in the elf file
+                // one instr counts occupies two addresses:
+                //insn->A_type.immed = S_GET_VALUE(second_op->X_add_symbol); // "/2"
+            }
+            else if((first_op->X_op == O_register) && (second_op->X_op == O_register))
+            {
+                insn->B_type.prefix = OP_B_TYPE_PREFIX;
+                insn->B_type.rX_or_ctrl = first_op->X_add_number;
+                insn->B_type.opcode = opcode;
+                insn->B_type.rY_or_ctrl = second_op->X_add_number;
+            }
+            else
+            {
+                as_bad("%s usage: first op has to be reg, second op has to be either reg or const or symbol", whole_instr->X_op);
+                error = 1;
+            }
+
+            break;
+
+
         case ADD: if(whole_instr->X_op == ADD) { opcode = OP_ADD; }
         case ADC: if(whole_instr->X_op == ADC) { opcode = OP_ADC; }
         case SUB: if(whole_instr->X_op == SUB) { opcode = OP_SUB; }
@@ -596,7 +623,7 @@ void md_assemble(char *insn_str)
         case OR:  if(whole_instr->X_op == OR)  { opcode = OP_OR;  }
         case XOR: if(whole_instr->X_op == XOR) { opcode = OP_XOR; }
         case TST: if(whole_instr->X_op == TST) { opcode = OP_TST; }
-            gas_assert((whole_instr->X_add_symbol != 0) && (whole_instr->X_op_symbol != 0));
+            //gas_assert((whole_instr->X_add_symbol != 0) && (whole_instr->X_op_symbol != 0));
 
             first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
             second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
@@ -629,7 +656,7 @@ void md_assemble(char *insn_str)
 
     /* Only one reg as operand --------------------------------------------------------*/
         case SWP:
-            gas_assert(whole_instr->X_add_symbol != 0);
+            //gas_assert(whole_instr->X_add_symbol != 0);
 
             first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
 
@@ -656,7 +683,7 @@ void md_assemble(char *insn_str)
         case ROR: if(whole_instr->X_op == ROR) { ctrl_field = ROR_CTRL; }
         case RLC: if(whole_instr->X_op == RLC) { ctrl_field = RLC_CTRL; }
         case RRC: if(whole_instr->X_op == RRC) { ctrl_field = RRC_CTRL; }
-            gas_assert(whole_instr->X_add_symbol != 0);
+            //gas_assert(whole_instr->X_add_symbol != 0);
 
             first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
 
@@ -692,7 +719,7 @@ void md_assemble(char *insn_str)
         case JSE: if(whole_instr->X_op == JSE) { ctrl_field = JSE_CTRL; }
         case JG:  if(whole_instr->X_op == JG)  { ctrl_field = JG_CTRL;  }
         case JSR: if(whole_instr->X_op == JSR) { ctrl_field = JSR_CTRL; }
-             gas_assert(whole_instr->X_add_symbol != 0);
+             //gas_assert(whole_instr->X_add_symbol != 0);
 
             first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
 
@@ -817,7 +844,7 @@ arelent *tc_gen_reloc(asection *seg, fixS *fixp)
     arelent *reloc;
     symbolS *sym;
 
-    gas_assert(fixp != 0);
+    //gas_assert(fixp != 0);
 
     reloc = XNEW(arelent);
     reloc->sym_ptr_ptr = XNEW(asymbol*);

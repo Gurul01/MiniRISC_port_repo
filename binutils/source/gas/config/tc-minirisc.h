@@ -20,15 +20,10 @@
 /********************************************************/
 /*                     TWO OPERANDS                     */
 /********************************************************/
-/* Only one kind of addressing */
-#define LDSP  O_md1   // Only reg - imm  //-----------
-#define STSP  O_md2   // Only imm - reg  //-----------
-
-#define LOAD  O_md3 // Only reg - reg    //-----------
-#define STORE O_md4 // Only reg - reg    //-----------
-
 /* Both addressing modes *******/
-#define MOV  O_md5                       //-----------
+#define LOAD  O_md3
+#define STORE O_md4
+#define MOV   O_md5                      //-----------
 
 #define ADD  O_add                       //-REUSE
 #define ADC  O_md6                       //-----------
