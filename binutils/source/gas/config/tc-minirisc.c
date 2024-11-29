@@ -438,7 +438,6 @@ static void minirisc_emit_insn(minirisc_slot_insn *insn, expressionS *whole_inst
 
     uint16_t e_insn = 0;
     char *frag = frag_more(MINIRISC_BYTES_SLOT_INSTRUCTION);
-    bool is_op_ctrl = false;
 
     if((insn->B_type.prefix & 0xF) == OP_B_TYPE_PREFIX)
     {
@@ -455,21 +454,48 @@ static void minirisc_emit_insn(minirisc_slot_insn *insn, expressionS *whole_inst
 
         if(OP_SWP_SHIFT != insn->A_type.opcode)
         {
-            expressionS *addr_expr = symbol_get_value_expression(whole_instr->X_add_symbol);
+            expressionS *addr_expr = NULL;
             int where;
-            
-            know(O_symbol == addr_expr->X_op);
 
-            /*Get the location in the current frag where the fixup is to be inserted*/
-            where = frag - frag_now->fr_literal;
+            if(OP_CTRL == insn->A_type.opcode)
+            {
+                expressionS *addr_expr_first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
+                
+                if(O_symbol == addr_expr_first_op->X_op)
+                    addr_expr = addr_expr_first_op;
+            }
+            else if((OP_MOV == insn->A_type.opcode) || (OP_LOAD == insn->A_type.opcode) || (OP_STORE == insn->A_type.opcode))
+            {
+                expressionS *addr_expr_first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
+                expressionS *addr_expr_second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
 
-            /*Reverse giving '1' as value to the X_add_number so it won't be turned into a const expression */
-            addr_expr->X_add_number = 0;
+                if((O_symbol == addr_expr_first_op->X_op) || (O_symbol == addr_expr_second_op->X_op))
+                {
+                    if((O_symbol == addr_expr_first_op->X_op) && (O_symbol == addr_expr_second_op->X_op))
+                        as_bad("STORE/LOAD: Only one of the operands can be a symbol!");
 
-            (void)fix_new_exp(frag_now, where, 1, addr_expr, 0, BFD_RELOC_8);
+                    if(O_symbol == addr_expr_first_op->X_op)
+                        addr_expr = addr_expr_first_op;
+                    else
+                        addr_expr = addr_expr_second_op;
+                }
+            }
 
-            /*If we had relative relocation for an instruction:*/
-            //(void)fix_new_exp(frag_now, where, 1, addr_expr, 1, BFD_RELOC_MINIRISC_RELATIVE);
+            if(NULL != addr_expr)
+            {
+                know(O_symbol == addr_expr->X_op);
+
+                /*Get the location in the current frag where the fixup is to be inserted*/
+                where = frag - frag_now->fr_literal;
+
+                /*Reverse giving '1' as value to the X_add_number so it won't be turned into a const expression */
+                addr_expr->X_add_number = 0;
+
+                (void)fix_new_exp(frag_now, where, 1, addr_expr, 0, BFD_RELOC_8);
+
+                /*If we had relative relocation for an instruction:*/
+                //(void)fix_new_exp(frag_now, where, 1, addr_expr, 1, BFD_RELOC_MINIRISC_RELATIVE);
+            }
         }   
     }
 
@@ -515,7 +541,7 @@ void md_assemble(char *insn_str)
         /********************************************************/
 
     /* Both addressing modes --------------------------------------------------------*/
-        case STORE: if(whole_instr->X_op == MOV) { opcode = OP_STORE; }
+        case STORE: if(whole_instr->X_op == STORE) { opcode = OP_STORE; }
             first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
             second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
 
@@ -546,7 +572,7 @@ void md_assemble(char *insn_str)
 
             break;
 
-        case LOAD: if(whole_instr->X_op == MOV) { opcode = OP_LOAD; }
+        case LOAD: if(whole_instr->X_op == LOAD) { opcode = OP_LOAD; }
         case MOV: if(whole_instr->X_op == MOV) { opcode = OP_MOV; }
             
 

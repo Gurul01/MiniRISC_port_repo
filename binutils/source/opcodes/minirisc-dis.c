@@ -50,7 +50,7 @@ static void minirisc_print_insn(minirisc_slot_insn *insn)
 
     int i;
     char insn_buf[HEX_DATA_STRING_POS];
-    char OP_string[5] = "";
+    char OP_string[6] = "";
     unsigned int rX = 0;
     unsigned int rY = 0;
     unsigned int imm = 0;
@@ -62,9 +62,8 @@ static void minirisc_print_insn(minirisc_slot_insn *insn)
         /********************************************************************************************************************************************/
         switch(insn->B_type.opcode)
         {
-            case OP_LOAD: // LOAD instruction
+            case OP_LOAD: if(insn->B_type.opcode == OP_LOAD) { strcpy(OP_string, "LOAD"); }
                 
-                strcpy(OP_string, "LOAD");
                 rX = insn->B_type.rX_or_ctrl;
                 rY = insn->B_type.rY_or_ctrl;
 
@@ -169,17 +168,16 @@ static void minirisc_print_insn(minirisc_slot_insn *insn)
             /********************************************************/
 
         /* Only one kind of addressing --------------------------------------------------------*/
-            case OP_LOAD: // LDSP instruction
+            case OP_STORE : if(insn->A_type.opcode == OP_STORE) { strcpy(OP_string, "STORE"); }
                 
-                strcpy(OP_string, "LOAD");
                 rX  = insn->A_type.rX_or_ctrl;
                 imm = insn->A_type.immed;
 
-                sprintf(insn_buf, "%s r%d %d", OP_string, rX, imm);
+                sprintf(insn_buf, "%s %d r%d", OP_string, imm, rX);
                 break;
 
         /* Both addressing modes --------------------------------------------------------*/
-            case OP_STORE : if(insn->A_type.opcode == OP_STORE) { strcpy(OP_string, "STORE"); }
+            case OP_LOAD: if(insn->A_type.opcode == OP_LOAD) { strcpy(OP_string, "LOAD"); }
             case OP_MOV : if(insn->A_type.opcode == OP_MOV) { strcpy(OP_string, "MOV"); }
             case OP_ADD : if(insn->A_type.opcode == OP_ADD) { strcpy(OP_string, "ADD"); }
             case OP_ADC : if(insn->A_type.opcode == OP_ADC) { strcpy(OP_string, "ADC"); }
