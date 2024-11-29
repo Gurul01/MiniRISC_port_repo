@@ -663,10 +663,14 @@ mrmr16_print_operand (FILE *file, rtx x, int code)
       /* No need to handle all strange variants, let output_addr_const
 	 do it for us.  */
       if (CONSTANT_P (operand))
-	{
-	  output_addr_const (file, operand);
-	  return;
-	}
+      {
+        // Handling the case when gcc wants to print negativ numbers as operands 
+        if(INTVAL(operand) < 0)
+          operand = GEN_INT(256 + INTVAL(operand));
+
+        output_addr_const (file, operand);
+        return;
+      }
 
       LOSE_AND_RETURN ("unexpected operand", x);
     }
