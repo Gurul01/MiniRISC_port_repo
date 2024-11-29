@@ -172,20 +172,15 @@
 	  "")
 
 (define_insn "movqi_internal"
-    [(set (match_operand:QI 0 "" "=r,r,r,r,r,r,r,r,W,A,Y,i")
-          (match_operand:QI 1 "mrmr16_general_movsrc_operand" "r,i,A,Y,W,i,A,Y,r,r,r,r"))]
+    [(set (match_operand:QI 0 "" "=r,r,r,r,r,W,A")
+          (match_operand:QI 1 "mrmr16_general_movsrc_operand" "r,i,Y,W,A,r,r"))]
           ""
           "@
           MOV\\t%0 %1
           MOV\\t%0 %1
           MOV\\t%0 %1
-          MOV\\t%0 %1
           LOAD\\t%0 %1
           LOAD\\t%0 %1
-          LOAD\\t%0 %1
-          LOAD\\t%0 %1
-          STORE\\t%0 %1
-          STORE\\t%0 %1
           STORE\\t%0 %1
           STORE\\t%0 %1"
           [])
