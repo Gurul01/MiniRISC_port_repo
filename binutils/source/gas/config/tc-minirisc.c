@@ -124,6 +124,10 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
     {
         opcode = SUB;
     }
+    else if( 0 == strcmp(name, "CMP")  || 0 == strcmp(name, "cmp"))
+    {
+        opcode = CMP;
+    }
     else if( 0 == strcmp(name, "CMC")  || 0 == strcmp(name, "cmc"))
     {
         opcode = CMC;

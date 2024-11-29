@@ -62,16 +62,16 @@ static void minirisc_print_insn(minirisc_slot_insn *insn)
         /********************************************************************************************************************************************/
         switch(insn->B_type.opcode)
         {
-            case OP_LOAD: if(insn->B_type.opcode == OP_LOAD) { strcpy(OP_string, "LOAD"); }
+            case OP_STORE: if(insn->B_type.opcode == OP_STORE) { strcpy(OP_string, "STORE"); }
                 
                 rX = insn->B_type.rX_or_ctrl;
                 rY = insn->B_type.rY_or_ctrl;
 
-                sprintf(insn_buf, "%s r%d r%d", OP_string, rX, rY);
+                sprintf(insn_buf, "%s r%d r%d", OP_string, rY, rX);
                 break;
 
         /* Both addressing modes --------------------------------------------------------*/
-            case OP_STORE: if(insn->B_type.opcode == OP_STORE) { strcpy(OP_string, "STORE"); }
+            case OP_LOAD: if(insn->B_type.opcode == OP_LOAD) { strcpy(OP_string, "LOAD"); }
             case OP_MOV: if(insn->B_type.opcode == OP_MOV) { strcpy(OP_string, "MOV"); }
             case OP_ADD: if(insn->B_type.opcode == OP_ADD) { strcpy(OP_string, "ADD"); }
             case OP_ADC: if(insn->B_type.opcode == OP_ADC) { strcpy(OP_string, "ADC"); }
@@ -87,7 +87,7 @@ static void minirisc_print_insn(minirisc_slot_insn *insn)
                 rX = insn->B_type.rX_or_ctrl;
                 rY = insn->B_type.rY_or_ctrl;
 
-                sprintf(insn_buf, "%s r%d r%d", OP_string, rY, rX);
+                sprintf(insn_buf, "%s r%d r%d", OP_string, rX, rY);
                 break;
 
 
