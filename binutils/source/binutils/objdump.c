@@ -3706,6 +3706,15 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
    next_sym
   } loop_until;
 
+  if(0 == strcmp(section->name, ".data")) //8 bit wide data memory
+  {
+    //stop_offset += 3;
+    opb = 1;
+    pinfo->octets_per_byte = 1;
+    pinfo->data_size = 1;
+    pinfo->bytes_per_line = 1;
+  }
+
   if (only_list == NULL)
     {
       /* Sections that do not contain machine

@@ -7,6 +7,10 @@
 #define MINIRISC_BYTES_SLOT_INSTRUCTION 2
 #endif
 
+#ifndef MINIRISC_BYTES_SLOT_DATA_ENTRY
+#define MINIRISC_BYTES_SLOT_DATA_ENTRY 1
+#endif
+
 #define OP_B_TYPE_PREFIX 0b1111
 
 enum minirisc_opcode

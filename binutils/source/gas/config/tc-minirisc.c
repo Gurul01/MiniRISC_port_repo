@@ -506,7 +506,7 @@ static void minirisc_emit_insn(minirisc_slot_insn *insn, expressionS *whole_inst
                 where = frag - frag_now->fr_literal;
 
                 /*Reverse giving '1' as value to the X_add_number so it won't be turned into a const expression */
-                addr_expr->X_add_number = 0;
+                addr_expr->X_add_number -= 1;
 
                 (void)fix_new_exp(frag_now, where, 1, addr_expr, 0, BFD_RELOC_8);
 
@@ -863,32 +863,48 @@ arelent *tc_gen_reloc(asection *seg, fixS *fixp)
     reloc->sym_ptr_ptr = XNEW(asymbol*);
     *reloc->sym_ptr_ptr = symbol_get_bfdsym(fixp->fx_addsy);
 
-    segT sec;
-    expressionS *exp;
-    symbolS *sym;
+    // segT sec;
+    // expressionS *exp;
+    // symbolS *sym;
 
-    sym = fixp->fx_addsy;
-    sec = S_GET_SEGMENT(sym);
-    exp = symbol_get_value_expression(sym);
+    // sym = fixp->fx_addsy;
+    // sec = S_GET_SEGMENT(sym);
+    // exp = symbol_get_value_expression(sym);
 
-    if(0 == strcmp(sec->name, ".text"))
-    {
-        //exp->X_add_number /= 2;
-        printf("NA NA ez TEX T: %s\n", sec->name);
-        //reloc->addend = fixp->fx_offset / 2;
-        reloc->addend = fixp->fx_offset;
-    }
-    else
-    {
-        printf("NA NA ez DA TA: %s\n", sec->name);
-        reloc->addend = fixp->fx_offset;
-    }
     
     
 
     reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
     reloc->howto = bfd_reloc_type_lookup(stdoutput, fixp->fx_r_type);
-    // reloc->addend = fixp->fx_offset;
+
+    // if(exp->X_op = O_symbol)
+    // {
+    //      printf("ArrivedXXX_1\n");
+    //      printf("add_num = %d\n", exp->X_add_number);
+    //      printf("fx_offset = %d\n", fixp->fx_offset);
+    //     asymbol *asymp = symbol_get_bfdsym(sym);
+    //     if(asymp->flags & BSF_GLOBAL)
+    //     {
+    //              printf("ArrivedXXX_3\n");
+    //              printf("add_num = %d\n", exp->X_add_number);
+    //              printf("fx_offset = %d\n", fixp->fx_offset);
+
+    //             if(fixp->fx_offset != 0)
+    //             {
+    //                 reloc->addend = ~((int64_t)exp->X_add_number - (int64_t)fixp->fx_offset) + 1; //fixp->fx_offset - exp->X_add_number;
+    //                 if(reloc->addend == 0)
+    //                 {
+    //                     //If the addend is zero then the whole value will be zero in the obj file
+    //                     //This only the case when we try to relocate global symbols in the assembly pahse if it contains a symbol relative offset...
+    //                     // Or somthing like that
+    //                     return NULL;
+    //                 }
+    //                 return reloc;
+    //             }
+    //     }
+    // }
+    
+    reloc->addend = fixp->fx_offset;
     
     return reloc;
 }

@@ -248,21 +248,42 @@ static void minirisc_print_insn(minirisc_slot_insn *insn)
 
 int print_insn_minirisc(bfd_vma addr, disassemble_info *info)
 {
-    int bytes_read = MINIRISC_BYTES_SLOT_INSTRUCTION;
+    int bytes_read;
 
-    char insn_buf[MINIRISC_BYTES_SLOT_INSTRUCTION];
-    minirisc_slot_insn insn;
-
-    memset(&insn, 0, sizeof(minirisc_slot_insn));
-
-    if( (*info->read_memory_func)(addr, insn_buf, MINIRISC_BYTES_SLOT_INSTRUCTION, info) )
+    if(0 == strcmp(info->section->name, ".text")) //16 bit wide instrction memory
     {
-        (*info->fprintf_func)(info->stream, "Error: attempted to read more instruction bytes (%d) than available (%d)", MINIRISC_BYTES_SLOT_INSTRUCTION, info->buffer_length);
-        return -1;
-    }
+        bytes_read = MINIRISC_BYTES_SLOT_INSTRUCTION;
 
-    minirisc_decode_insn(insn_buf, &insn);
-    minirisc_print_insn(&insn);
+        char insn_buf[MINIRISC_BYTES_SLOT_INSTRUCTION];
+        minirisc_slot_insn insn;
+
+        info->data_size = 2;
+        //info->bytes_per_line = 2;
+        info->octets_per_byte = 2;
+
+        memset(&insn, 0, sizeof(minirisc_slot_insn));
+
+        if( (*info->read_memory_func)(addr, insn_buf, MINIRISC_BYTES_SLOT_INSTRUCTION, info) )
+        {
+            (*info->fprintf_func)(info->stream, "Error: attempted to read more instruction bytes (%d) than available (%d)", MINIRISC_BYTES_SLOT_INSTRUCTION, info->buffer_length);
+            return -1;
+        }
+
+        minirisc_decode_insn(insn_buf, &insn);
+        minirisc_print_insn(&insn);
+    }
+    else //8 bit wide data memory
+    {
+        bytes_read = MINIRISC_BYTES_SLOT_DATA_ENTRY;
+
+        char insn_buf[MINIRISC_BYTES_SLOT_DATA_ENTRY + 1];
+
+        if( (*info->read_memory_func)(addr, insn_buf, MINIRISC_BYTES_SLOT_DATA_ENTRY, info) )
+        {
+            (*info->fprintf_func)(info->stream, "Error: attempted to read more DATA bytes (%d) than available (%d)", MINIRISC_BYTES_SLOT_DATA_ENTRY, info->buffer_length);
+            return -1;
+        }
+    }
 
     return bytes_read;
 }

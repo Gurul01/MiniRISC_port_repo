@@ -18,6 +18,7 @@
         "utility": "c",
         "variant": "c",
         "cmath": "c",
-        "complex": "c"
+        "complex": "c",
+        "namespace-1.C": "cpp"
     }
 }
