@@ -9,6 +9,15 @@
         "common-target-def.h": "c",
         "optabs.h": "c",
         "*.def": "c",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "optional": "c",
+        "system_error": "c",
+        "array": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "variant": "c",
+        "cmath": "c",
+        "complex": "c"
     }
 }

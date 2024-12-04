@@ -468,4 +468,15 @@ enum reg_class
 #define DWARF2_DEBUGGING_INFO
 #define PREFERRED_DEBUGGING_TYPE DWARF2_DEBUG
 
+// #undef  LIB_SPEC
+// #define LIB_SPEC ""
+// #undef  LINK_SPEC
+// #define LINK_SPEC ""
+
+// //#define LINK_COMMAND_SPEC ""
+// #define MAX_OUTPUT 1024
+// char* linker_function();
+
+// #define LINK_COMMAND_SPEC linker_function()
+
 #endif /* GCC_MRMR16_H */

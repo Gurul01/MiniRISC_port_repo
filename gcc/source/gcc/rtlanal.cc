@@ -929,15 +929,15 @@ void
 split_const (rtx x, rtx *base_out, rtx *offset_out)
 {
   if (GET_CODE (x) == CONST)
+  {
+    x = XEXP (x, 0);
+    if (GET_CODE (x) == PLUS && CONST_INT_P (XEXP (x, 1)))
     {
-      x = XEXP (x, 0);
-      if (GET_CODE (x) == PLUS && CONST_INT_P (XEXP (x, 1)))
-	{
-	  *base_out = XEXP (x, 0);
-	  *offset_out = XEXP (x, 1);
-	  return;
-	}
+      *base_out = XEXP (x, 0);
+      *offset_out = XEXP (x, 1);
+      return;
     }
+  }
   *base_out = x;
   *offset_out = const0_rtx;
 }

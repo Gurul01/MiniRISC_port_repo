@@ -417,7 +417,36 @@ mrmr16_legitimate_address_p (machine_mode mode ATTRIBUTE_UNUSED,
   if (GET_CODE (x) == SYMBOL_REF
       || GET_CODE (x) == LABEL_REF
       || GET_CODE (x) == CONST)
+//       {
+//         if (GET_CODE(x) == PLUS)
+//           return false;
+//         else
+//           return true;
+
+//         rtx op = XEXP (x, 0);
+//         if (GET_CODE(op) == PLUS)
+//           return false;
+//         else
+//           return true;
+//       }
+//   return false;
+// }
+
+// static bool
+// mrmr16_legitimate_add (machine_mode mode ATTRIBUTE_UNUSED,
+//                            rtx x, bool strict_p)
+// {
+//   if (GET_CODE(x) == PLUS)
+//     return false;
+
+//   if (REG_P (x) && mrmr16_reg_ok_for_base_p (x, strict_p))
+//     return true;
+
+//   if (GET_CODE (x) == SYMBOL_REF
+//       || GET_CODE (x) == LABEL_REF
+//       || GET_CODE (x) == CONST)
     return true;
+
   return false;
 }
 
@@ -510,14 +539,15 @@ mrmr16_offset_address_p (rtx x)
   x = XEXP (x, 0);
 
   if (GET_CODE (x) == PLUS)
-    {
-      x = XEXP (x, 1);
-      if (GET_CODE (x) == CONST_INT)
-	{
-	  unsigned int v = INTVAL (x) & 0xFFFF8000;
-	  return (v == 0xFFFF8000 || v == 0x00000000);
-	}
-    }
+  {
+    return 0;
+    // x = XEXP (x, 1);
+    // if (GET_CODE (x) == CONST_INT)
+    // {
+    //   unsigned int v = INTVAL (x) & 0xFFFF8000;
+    //   return (v == 0xFFFF8000 || v == 0x00000000);
+    // }
+  }
   return 0;
 }
 
@@ -758,9 +788,44 @@ mrmr16_print_operand (FILE *file, rtx x, int code)
 /******************************************************************************
  * Addressing Modes
  ******************************************************************************/
+// static bool
+// or1k_legitimate_constant_p (machine_mode, rtx x)
+// {
+//   if (GET_CODE (x) == PLUS)
+//   {
+//     return false;
+//   }
 
-/* #undef  TARGET_LEGITIMATE_ADDRESS_P */
-/* #define TARGET_LEGITIMATE_ADDRESS_P mrmr16_legitimate_address_p */
+  
+
+
+//   switch (GET_CODE (x))
+//   {
+//     case CONST_INT:
+//       /* We construct these, rather than spilling to memory.  */
+//       return true;
+
+//     case CONST:
+//     case SYMBOL_REF:
+//     case LABEL_REF:
+//       x = XEXP (x, 0);
+//       if (GET_CODE (x) == PLUS)
+//       {
+//         return false;
+//       }
+    
+
+//     default:
+//       return false;
+//   }
+// }
+
+// #undef  TARGET_LEGITIMATE_CONSTANT_P
+// #define TARGET_LEGITIMATE_CONSTANT_P or1k_legitimate_constant_p
+
+
+//  #undef  TARGET_LEGITIMATE_ADDRESS_P
+//  #define TARGET_LEGITIMATE_ADDRESS_P mrmr16_legitimate_add
 #undef  TARGET_ADDR_SPACE_LEGITIMATE_ADDRESS_P
 #define TARGET_ADDR_SPACE_LEGITIMATE_ADDRESS_P mrmr16_legitimate_address_p
 

@@ -737,22 +737,35 @@ symbol_find_or_make (const char *name)
   symbolP = symbol_find (name);
 
   if (symbolP == NULL)
+  {
+    if (! flag_keep_locals && bfd_is_local_label_name (stdoutput, name))
     {
-      if (! flag_keep_locals && bfd_is_local_label_name (stdoutput, name))
-	{
-	  symbolP = md_undefined_symbol ((char *) name);
-	  if (symbolP != NULL)
-	    return symbolP;
+      symbolP = md_undefined_symbol ((char *) name);
+      if (symbolP != NULL)
+        return symbolP;
 
-	  symbolP = (symbolS *) local_symbol_make (name, undefined_section,
-						   &zero_address_frag, 0);
-	  return symbolP;
-	}
+      symbolP = (symbolS *) local_symbol_make (name, undefined_section,
+                &zero_address_frag, 0);
 
-      symbolP = symbol_make (name);
+      // if(symbolP != NULL)
+      // {
+      //   //if(0 == strcmp(symbolP->bsym->section->name, "text"))
+      //     symbolP->bsym->value = symbolP->bsym->value / 2;
+      // }
 
-      symbol_table_insert (symbolP);
-    }				/* if symbol wasn't found */
+      return symbolP;
+    }
+
+    symbolP = symbol_make (name);
+
+    // if(symbolP != NULL)
+    // {
+    //   //if(0 == strcmp(symbolP->bsym->section->name, "text"))
+    //     symbolP->bsym->value = symbolP->bsym->value / 2;
+    // }
+
+    symbol_table_insert (symbolP);
+  }				/* if symbol wasn't found */
 
   return (symbolP);
 }

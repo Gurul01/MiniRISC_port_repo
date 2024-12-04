@@ -32,10 +32,10 @@
   (ior (match_code "symbol_ref")
        (match_code "const")))
 
-(define_constraint "B"
-  "An offset address."
-  (and (match_code "mem")
-       (match_test "mrmr16_offset_address_p (op)")))
+;;(define_constraint "B"
+;;  "An offset address."
+;;  (and (match_code "mem")
+;;       (match_test "mrmr16_offset_address_p (op)")))
 
 (define_memory_constraint "W"
   "A register indirect memory operand."

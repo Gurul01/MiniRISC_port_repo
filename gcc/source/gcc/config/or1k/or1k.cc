@@ -957,6 +957,18 @@ or1k_legitimate_constant_p (machine_mode, rtx x)
       /* These may need to be split and not reconstructed.  */
       return or1k_tls_symbolic_operand (x) == TLS_MODEL_NONE;
 
+      x = XEXP (x, 0);
+      if (GET_CODE (x) == PLUS && CONST_INT_P (XEXP (x, 1)))
+      {
+        *base_out = XEXP (x, 0);
+        *offset_out = XEXP (x, 1);
+        return false;
+      }
+      else
+      {
+        return true;
+      }
+
     default:
       return false;
     }

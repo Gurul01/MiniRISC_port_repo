@@ -1011,6 +1011,8 @@ bfd_install_relocation (bfd *abfd,
   asymbol *symbol;
   bfd_byte *data;
 
+  reloc_entry->address = reloc_entry->address / 2;
+
   symbol = *(reloc_entry->sym_ptr_ptr);
 
   /* If there is a function supplied to handle this relocation type,
@@ -1168,7 +1170,19 @@ _bfd_final_link_relocate (reloc_howto_type *howto,
      against a symbol.  We want to compute the value of the symbol to
      relocate to.  This is just VALUE, the value of the symbol, plus
      ADDEND, any addend associated with the reloc.  */
-  relocation = value + addend;
+  if(0 == strcmp(".text", input_section->name))
+  {
+    relocation = value/2 + addend;
+  }
+  else if(0 == strcmp(".data", input_section->name))
+  {
+    relocation = value + addend;
+  }
+  else
+  {
+    printf("NA NA NA NA: %s", input_section->name);
+  }
+  
 
   /* If the relocation is PC relative, we want to set RELOCATION to
      the distance between the symbol (currently in RELOCATION) and the

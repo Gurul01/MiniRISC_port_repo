@@ -7,10 +7,10 @@ const bfd_arch_info_type bfd_minirisc_arch =
     8,
 
 
-    8,
+    16,
 
 
-    8,
+    16,
 
 
     bfd_arch_minirisc,

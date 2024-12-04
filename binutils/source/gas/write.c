@@ -1811,8 +1811,53 @@ set_symtab (void)
 	    /* Include this section symbol in the symbol table.  */
 	    if (symbol_section_p (symp))
 	      asympp[i]->flags |= BSF_SECTION_SYM_USED;
+
+	// if (symbol_rootP)
+    // {
+    //   symbolS *symp;
+
+    //   for (symp = symbol_rootP; symp; symp = symbol_next (symp))
+	//   {
+	// 	expressionS *exp;
+	// 	exp = symbol_get_value_expression(symp);
+
+	// 	if(0 == strcmp(asympp[i]->section->name, ".text"))
+	// 	{
+	// 		//exp->X_add_number /= 2;
+	// 		asympp[i]->value /= 2;
+	// 		//asympp[i]->section->lma /= 2;
+	// 		//asympp[i]->section->relocation->addend /= 2;
+	// 		printf("write NA NA ez TEX T: %s\n", asympp[i]->section->name);
+	// 	}
+	// 	else
+	// 	{
+	// 		printf("write NA NA ez DA TA: %s\n", asympp[i]->section->name);
+	// 	}
+	//   }
+	// 	//resolve_symbol_value (symp);
+    // }
+//   resolve_local_symbol_values ();
+//   resolve_reloc_expr_symbols ();
+
+		// expressionS *exp;
+		// exp = symbol_get_value_expression(symp);
+
+		// if(0 == strcmp(asympp[i]->section->name, ".text"))
+		// {
+		// 	//exp->X_add_number /= 2;
+		// 	asympp[i]->value /= 2;
+		// 	//asympp[i]->section->lma /= 2;
+		// 	asympp[i]->section->relocation->addend /= 2;
+		// 	printf("write NA NA ez TEX T: %s\n", asympp[i]->section->name);
+		// }
+		// else
+		// {
+		// 	printf("write NA NA ez DA TA: %s\n", asympp[i]->section->name);
+		// }
+
 	    i++;
 	  }
+
     }
   else
     asympp = 0;
@@ -2210,6 +2255,31 @@ write_object_file (void)
 
   dwarf2dbg_final_check ();
 
+//   if (symbol_rootP)
+//     {
+//       symbolS *symp;
+
+//       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
+// 	  {
+// 		expressionS *exp = symbol_get_value_expression(symp);
+// 		asymbol *asymp = symbol_get_bfdsym (symp);
+
+// 		if(0 == strcmp(asymp->section->name, ".text"))
+// 		{
+// 			//exp->X_add_number /= 2;
+// 			asymp->value /= 2;
+// 			//asympp[i]->section->lma /= 2;
+// 			//asymp->section->relocation->addend /= 2;
+// 			printf("ss write NA NA ez TEX T: %s\n", asymp->section->name);
+// 		}
+// 		else
+// 		{
+// 			printf("ss write NA NA ez DA TA: %s\n", asymp->section->name);
+// 		}
+// 	  }
+// 		//resolve_symbol_value (symp);
+//     }
+
 #ifdef md_post_relax_hook
   md_post_relax_hook;
 #endif
@@ -2318,6 +2388,31 @@ write_object_file (void)
   }
 #endif /* not WORKING_DOT_WORD  */
 
+// if (symbol_rootP)
+//     {
+//       symbolS *symp;
+
+//       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
+// 	  {
+// 		expressionS *exp = symbol_get_value_expression(symp);
+// 		asymbol *asymp = symbol_get_bfdsym (symp);
+
+// 		if(0 == strcmp(asymp->section->name, ".text"))
+// 		{
+// 			//exp->X_add_number /= 2;
+// 			asymp->value /= 2;
+// 			//asympp[i]->section->lma /= 2;
+// 			//asymp->section->relocation->addend /= 2;
+// 			printf("ss write NA NA ez TEX T: %s\n", asymp->section->name);
+// 		}
+// 		else
+// 		{
+// 			printf("ss write NA NA ez DA TA: %s\n", asymp->section->name);
+// 		}
+// 	  }
+// 		//resolve_symbol_value (symp);
+//     }
+
   /* Resolve symbol values.  This needs to be done before processing
      the relocations.  */
   if (symbol_rootP)
@@ -2325,10 +2420,75 @@ write_object_file (void)
       symbolS *symp;
 
       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
-	resolve_symbol_value (symp);
+	  {
+		asymbol *asymp = symbol_get_bfdsym (symp);
+		expressionS *exp = symbol_get_value_expression(symp);
+		if(0 == strcmp(asymp->section->name, ".text"))
+		{
+			exp->X_add_number /= 2;
+			printf("zzz write NA NA ez TEX T: %s\n", asymp->section->name);
+		}
+		else
+		{
+			printf("zzz write NA NA ez DA TA: %s\n", asymp->section->name);
+		}
+		resolve_symbol_value (symp);
+	  }
+		
     }
+
+// if (symbol_rootP)
+//     {
+//       symbolS *symp;
+
+//       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
+// 	  {
+// 		expressionS *exp = symbol_get_value_expression(symp);
+// 		asymbol *asymp = symbol_get_bfdsym (symp);
+
+// 		if(0 == strcmp(asymp->section->name, ".text"))
+// 		{
+// 			//exp->X_add_number /= 2;
+// 			asymp->value /= 2;
+// 			//asympp[i]->section->lma /= 2;
+// 			//asymp->section->relocation->addend /= 2;
+// 			printf("ss write NA NA ez TEX T: %s\n", asymp->section->name);
+// 		}
+// 		else
+// 		{
+// 			printf("ss write NA NA ez DA TA: %s\n", asymp->section->name);
+// 		}
+// 	  }
+// 		//resolve_symbol_value (symp);
+//     }
+
   resolve_local_symbol_values ();
   resolve_reloc_expr_symbols ();
+
+//   if (symbol_rootP)
+//     {
+//       symbolS *symp;
+
+//       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
+// 	  {
+// 		expressionS *exp = symbol_get_value_expression(symp);
+// 		asymbol *asymp = symbol_get_bfdsym (symp);
+
+// 		if(0 == strcmp(asymp->section->name, ".text"))
+// 		{
+// 			//exp->X_add_number /= 2;
+// 			asymp->value /= 2;
+// 			//asympp[i]->section->lma /= 2;
+// 			//asymp->section->relocation->addend /= 2;
+// 			printf("ss write NA NA ez TEX T: %s\n", asymp->section->name);
+// 		}
+// 		else
+// 		{
+// 			printf("ss write NA NA ez DA TA: %s\n", asymp->section->name);
+// 		}
+// 	  }
+// 		//resolve_symbol_value (symp);
+//     }
 
 #ifdef OBJ_ELF
   if (IS_ELF)
@@ -2353,6 +2513,31 @@ write_object_file (void)
 
   bfd_map_over_sections (stdoutput, fix_segment, (char *) 0);
 
+//   if (symbol_rootP)
+//     {
+//       symbolS *symp;
+
+//       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
+// 	  {
+// 		expressionS *exp = symbol_get_value_expression(symp);
+// 		asymbol *asymp = symbol_get_bfdsym (symp);
+
+// 		if(0 == strcmp(asymp->section->name, ".text"))
+// 		{
+// 			//exp->X_add_number /= 2;
+// 			asymp->value /= 2;
+// 			//asympp[i]->section->lma /= 2;
+// 			//asymp->section->relocation->addend /= 2;
+// 			printf("ss write NA NA ez TEX T: %s\n", asymp->section->name);
+// 		}
+// 		else
+// 		{
+// 			printf("ss write NA NA ez DA TA: %s\n", asymp->section->name);
+// 		}
+// 	  }
+// 		//resolve_symbol_value (symp);
+//     }
+
   /* Set up symbol table, and write it out.  */
   if (symbol_rootP)
     {
@@ -2364,11 +2549,34 @@ write_object_file (void)
 	  int punt = 0;
 	  const char *name;
 
+	   asymbol *asymp = symbol_get_bfdsym (symp);
+	   expressionS *exp = symbol_get_value_expression(symp);
+	//   if(0 == strcmp(asymp->section->name, ".text"))
+	//   {
+	// 	exp->X_add_number /= 2;
+	//   	printf("rrr write NA NA ez TEX T: %s\n", asymp->section->name);
+	//   }
+	//   else
+	//   {
+	//   	printf("rrr write NA NA ez DA TA: %s\n", asymp->section->name);
+	//   }
+
 	  if (skip_next_symbol)
 	    {
 	      /* Don't do anything besides moving the value of the
 		 symbol from the GAS value-field to the BFD value-field.  */
-	      symbol_get_bfdsym (symp)->value = S_GET_VALUE (symp);
+	      //symbol_get_bfdsym (symp)->value = S_GET_VALUE (symp);
+		  //asymbol *asymp = symbol_get_bfdsym (symp);
+			if(0 == strcmp(asymp->section->name, ".text"))
+			{
+				asymp->value = S_GET_VALUE (symp);// / 2;
+				printf("gg write NA NA ez TEX T: %s\n", asymp->section->name);
+			}
+			else
+			{
+				asymp->value = S_GET_VALUE (symp);
+				printf("gg write NA NA ez DA TA: %s\n", asymp->section->name);
+			}
 	      skip_next_symbol = false;
 	      continue;
 	    }
@@ -2467,7 +2675,20 @@ write_object_file (void)
 
 	  /* Set the value into the BFD symbol.  Up til now the value
 	     has only been kept in the gas symbolS struct.  */
-	  symbol_get_bfdsym (symp)->value = S_GET_VALUE (symp);
+	  //symbol_get_bfdsym (symp)->value = S_GET_VALUE (symp);
+	  //asymbol *asymp = symbol_get_bfdsym (symp);
+	  //expressionS *exp = symbol_get_value_expression(symp);
+	  if(0 == strcmp(asymp->section->name, ".text"))
+	  {
+		//exp->X_add_number /= 2;
+	  	asymp->value = S_GET_VALUE (symp);// / 2;
+	  	printf("cc write NA NA ez TEX T: %s\n", asymp->section->name);
+	  }
+	  else
+	  {
+		asymp->value = S_GET_VALUE (symp);
+	  	printf("cc write NA NA ez DA TA: %s\n", asymp->section->name);
+	  }
 
 	  /* A warning construct is a warning symbol followed by the
 	     symbol warned about.  Don't let anything object-format or
@@ -2489,6 +2710,31 @@ write_object_file (void)
   /* Stop if there is an error.  */
   if (!flag_always_generate_output && had_errors ())
     return;
+
+	// if (symbol_rootP)
+    // {
+    //   symbolS *symp;
+
+    //   for (symp = symbol_rootP; symp; symp = symbol_next (symp))
+	//   {
+	// 	expressionS *exp = symbol_get_value_expression(symp);
+	// 	asymbol *asymp = symbol_get_bfdsym (symp);
+
+	// 	if(0 == strcmp(asymp->section->name, ".text"))
+	// 	{
+	// 		//exp->X_add_number /= 2;
+	// 		asymp->value /= 2;
+	// 		//asympp[i]->section->lma /= 2;
+	// 		//asymp->section->relocation->addend /= 2;
+	// 		printf("ss write NA NA ez TEX T: %s\n", asymp->section->name);
+	// 	}
+	// 	else
+	// 	{
+	// 		printf("ss write NA NA ez DA TA: %s\n", asymp->section->name);
+	// 	}
+	//   }
+	// 	//resolve_symbol_value (symp);
+    // }
 
   /* Now that all the sizes are known, and contents correct, we can
      start writing to the file.  */
