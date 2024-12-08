@@ -117,30 +117,53 @@
 
 /* Register Basics */
 
-#define MRMR16_R0  0
-#define MRMR16_R1  1
-#define MRMR16_R2  2
-#define MRMR16_R3  3
-#define MRMR16_R4  4
-#define MRMR16_R5  5
-#define MRMR16_SP  6
-#define MRMR16_FP  7
-#define MRMR16_QFP 8
-#define MRMR16_QAP 9
-#define MRMR16_PC  10
-#define MRMR16_CC  11
+// Registers accessable from assembly
+#define MRMR16_R0   0 //return
+#define MRMR16_R1   1
+#define MRMR16_R2   2
+#define MRMR16_R3   3
+#define MRMR16_R4   4
+#define MRMR16_R5   5
+#define MRMR16_R6   6
+#define MRMR16_R7   7 //prologue/epilogue
+#define MRMR16_R8   8
+#define MRMR16_R9   9
+#define MRMR16_R10  10
+#define MRMR16_R11  11
 
-#define FIRST_PSEUDO_REGISTER 12
+#define MRMR16_SP  12 //sp...
+#define MRMR16_FP  13
 
-#define FIXED_REGISTERS                         \
-    { 0, 0, 0, 0,                               \
-      0, 0, 1, 1,                               \
-      1, 1, 1, 1 }
+#define MRMR16_QFP 14
+#define MRMR16_QAP 15
 
-#define CALL_USED_REGISTERS                     \
-    { 0, 0, 0, 0,                               \
-      0, 0, 1, 1,                               \
-      1, 1, 1, 1 }
+// Not accessable from assebly
+#define MRMR16_PC  16
+#define MRMR16_CC  17
+
+#define FIRST_PSEUDO_REGISTER 18
+
+#define FIXED_REGISTERS                                     \
+{                                                           \
+    /* го-г11=>0; r12-r17=>1 */                             \
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1    \
+}
+
+#define CALL_USED_REGISTERS                                 \
+{                                                           \
+    /* го-г7=>0; r7-r17=>1 */                               \
+    0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1    \
+}
+
+#define REG_ALLOC_ORDER                                                              \
+{                                                                                    \
+    1, 2, 3, 4, 5, 6,                /* caller saved registers */                    \
+    8, 9, 10, 11,                    /* callee saved registers */                    \
+    0,                               /* return value/address register */             \
+    7,                               /* used in prologue/epilogue construction */    \
+    12, 13, 14, 15, 16, 17           /* fp, sp, (PC, CC) */                          \
+}
+// 4, 3, 2, 1,                      /* argument registers */                        \
 
 /* Values in Registers */
 
@@ -171,12 +194,12 @@ enum reg_class
       "CC_REGS",                                \
       "ALL_REGS" }
 
-#define REG_CLASS_CONTENTS \
-{ { 0x00000000 }, /* Empty */			   \
-  { 0x000001FF }, /* R0 to R5, SP, FP, QFP */      \
-  { 0x00000400 }, /* PC */	                   \
-  { 0x00000800 }, /* CC */                         \
-  { 0x00000FFF }  /* All registers */              \
+#define REG_CLASS_CONTENTS                         \
+{ { 0x00000000 }, /* Empty */			               \
+  { 0x00007FFF }, /* R0 to R5, SP, FP, QFP */      \
+  { 0x00010000 }, /* PC */	                        \
+  { 0x00020000 }, /* CC */                         \
+  { 0x0003FFFF }  /* All registers */              \
 }
 
 /* A C expression whose value is a register class containing hard
@@ -229,7 +252,7 @@ enum reg_class
 /* Offset from the argument pointer register to the first argument's
    address.  On some machines it may depend on the data type of the
    function.  */
-#define FIRST_PARM_OFFSET(F) 2
+#define FIRST_PARM_OFFSET(F) 3
 
 /* A C expression whose value is RTL representing the location of the
    incoming return address at the beginning of any function, before
@@ -316,7 +339,7 @@ enum reg_class
 /* Define this macro as a C expression that is nonzero for registers that are
    used by the epilogue or the return pattern.  The stack and frame
    pointer registers are already assumed to be used as needed.  */
-#define EPILOGUE_USES(R) (R == MRMR16_R5)
+#define EPILOGUE_USES(R) (R == MRMR16_R7)
 
 /* Profiling */
 
@@ -385,10 +408,10 @@ enum reg_class
 
 /* Instruction Output */
 
-#define REGISTER_NAMES {                        \
-        "r0", "r1", "r2", "r3",                 \
-        "r4", "r5", "sp", "fp",                 \
-        "?fp", "?ap", "pc", "?cc" }
+#define REGISTER_NAMES                                                                                   \
+{                                                                                                        \
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "sp", "fp", "?fp", "?ap", "pc", "?cc" \
+}
 
 /* Alignment Output */
 

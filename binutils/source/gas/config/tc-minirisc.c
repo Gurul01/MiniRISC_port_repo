@@ -430,15 +430,21 @@ void md_begin(void)
     {
         reg_array[i].number = i;
 
-        if(i == (MINIRISC_NUM_REGISTERS-1) - 1)
+        if(i == 12)
         {
-            // Name of the reg before the last one
+            sprintf(reg_array[i].name, "sp");
+        }
+        else if(i == 13)
+        {
             sprintf(reg_array[i].name, "fp");
         }
-        else if(i == (MINIRISC_NUM_REGISTERS-1))
+        else if(i == 14)
         {
-            // Name of the last reg
-            sprintf(reg_array[i].name, "sp");
+            sprintf(reg_array[i].name, "?fp");
+        }
+        else if(i == 15)
+        {
+            sprintf(reg_array[i].name, "?ap");
         }
         else
         {
