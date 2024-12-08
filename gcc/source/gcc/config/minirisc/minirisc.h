@@ -1,4 +1,4 @@
-/* Target Definitions for mrmr16.
+/* Target Definitions for minirisc.
    Copyright (C) 2008-2022 Free Software Foundation, Inc.
 
    This file is part of GCC.
@@ -17,8 +17,8 @@
    along with GCC; see the file COPYING3.  If not see
    <http://www.gnu.org/licenses/>.  */
 
-#ifndef GCC_MRMR16_H
-#define GCC_MRMR16_H
+#ifndef GCC_MINIRISC_H
+#define GCC_MINIRISC_H
 
 /******************************************************************************
  * Storage Layout
@@ -118,28 +118,28 @@
 /* Register Basics */
 
 // Registers accessable from assembly
-#define MRMR16_R0   0 //return
-#define MRMR16_R1   1
-#define MRMR16_R2   2
-#define MRMR16_R3   3
-#define MRMR16_R4   4
-#define MRMR16_R5   5
-#define MRMR16_R6   6
-#define MRMR16_R7   7 //prologue/epilogue
-#define MRMR16_R8   8
-#define MRMR16_R9   9
-#define MRMR16_R10  10
-#define MRMR16_R11  11
+#define MINIRISC_R0   0 //return
+#define MINIRISC_R1   1
+#define MINIRISC_R2   2
+#define MINIRISC_R3   3
+#define MINIRISC_R4   4
+#define MINIRISC_R5   5
+#define MINIRISC_R6   6
+#define MINIRISC_R7   7 //prologue/epilogue
+#define MINIRISC_R8   8
+#define MINIRISC_R9   9
+#define MINIRISC_R10  10
+#define MINIRISC_R11  11
 
-#define MRMR16_SP  12 //sp...
-#define MRMR16_FP  13
+#define MINIRISC_SP  12 //sp...
+#define MINIRISC_FP  13
 
-#define MRMR16_QFP 14
-#define MRMR16_QAP 15
+#define MINIRISC_QFP 14
+#define MINIRISC_QAP 15
 
 // Not accessable from assebly
-#define MRMR16_PC  16
-#define MRMR16_CC  17
+#define MINIRISC_PC  16
+#define MINIRISC_CC  17
 
 #define FIRST_PSEUDO_REGISTER 18
 
@@ -204,8 +204,8 @@ enum reg_class
 
 /* A C expression whose value is a register class containing hard
    register REGNO.  */
-#define REGNO_REG_CLASS(R) ((R < MRMR16_PC) ? GENERAL_REGS :		\
-                            (R == MRMR16_CC ? CC_REGS : SPECIAL_REGS))
+#define REGNO_REG_CLASS(R) ((R < MINIRISC_PC) ? GENERAL_REGS :		\
+                            (R == MINIRISC_CC ? CC_REGS : SPECIAL_REGS))
 
 /* A macro whose definition is the name of the class to which a valid
    base register must belong.  A base register is one used in an
@@ -232,7 +232,7 @@ enum reg_class
 
 /* A C expression which is nonzero if register number NUM is suitable
    for use as an index register in operand addresses.  */
-#define REGNO_OK_FOR_INDEX_P(NUM) MRMR16_FP
+#define REGNO_OK_FOR_INDEX_P(NUM) MINIRISC_FP
 
 
 /******************************************************************************
@@ -275,17 +275,17 @@ enum reg_class
 
 /* The register number of the stack pointer register, which must also
    be a fixed register according to `FIXED_REGISTERS'.  */
-#define STACK_POINTER_REGNUM MRMR16_SP
+#define STACK_POINTER_REGNUM MINIRISC_SP
 
 /* The register number of the frame pointer register, which is used to
    access automatic variables in the stack frame.  */
-#define FRAME_POINTER_REGNUM MRMR16_QFP
+#define FRAME_POINTER_REGNUM MINIRISC_QFP
 
 /* The register number of the arg pointer register, which is used to
    access the function's argument list.  */
-#define ARG_POINTER_REGNUM MRMR16_QAP
+#define ARG_POINTER_REGNUM MINIRISC_QAP
 
-#define HARD_FRAME_POINTER_REGNUM MRMR16_FP
+#define HARD_FRAME_POINTER_REGNUM MINIRISC_FP
 
 /* Elimination */
 
@@ -297,7 +297,7 @@ enum reg_class
    of registers.  */
 #define INITIAL_ELIMINATION_OFFSET(FROM, TO, OFFSET)			\
     do {                                                                \
-        (OFFSET) = mrmr16_initial_elimination_offset ((FROM), (TO));    \
+        (OFFSET) = minirisc_initial_elimination_offset ((FROM), (TO));    \
     } while (0)
 
 /* Stack Arguments */
@@ -326,9 +326,9 @@ enum reg_class
 
 /* A C statement (sans semicolon) for initializing the variable CUM
    for the state at the beginning of the argument list.
-   For mrmr16, the first arg is passed in R0.  */
+   For minirisc, the first arg is passed in R0.  */
 #define INIT_CUMULATIVE_ARGS(CUM,FNTYPE,LIBNAME,FNDECL,N_NAMED_ARGS)    \
-    (CUM = MRMR16_R0)
+    (CUM = MINIRISC_R0)
 
 /* A C expression that is nonzero if REGNO is the number of a hard
    register in which function arguments are sometimes passed.  */
@@ -339,7 +339,7 @@ enum reg_class
 /* Define this macro as a C expression that is nonzero for registers that are
    used by the epilogue or the return pattern.  The stack and frame
    pointer registers are already assumed to be used as needed.  */
-#define EPILOGUE_USES(R) (R == MRMR16_R7)
+#define EPILOGUE_USES(R) (R == MINIRISC_R7)
 
 /* Profiling */
 
@@ -453,12 +453,12 @@ enum reg_class
 
 #define TARGET_CPU_CPP_BUILTINS() \
   { \
-    builtin_define_std ("mrmr16");			\
-    builtin_define_std ("MRMR16");			\
+    builtin_define_std ("minirisc");			\
+    builtin_define_std ("MINIRISC");			\
     if (TARGET_LITTLE_ENDIAN)				\
-      builtin_define ("__MRMR16_LITTLE_ENDIAN__");	\
+      builtin_define ("__MINIRISC_LITTLE_ENDIAN__");	\
     else						\
-      builtin_define ("__MRMR16_BIG_ENDIAN__");		\
+      builtin_define ("__MINIRISC_BIG_ENDIAN__");		\
   }
 
 
@@ -491,4 +491,4 @@ enum reg_class
 #define DWARF2_DEBUGGING_INFO
 #define PREFERRED_DEBUGGING_TYPE DWARF2_DEBUG
 
-#endif /* GCC_MRMR16_H */
+#endif /* GCC_MINIRISC_H */

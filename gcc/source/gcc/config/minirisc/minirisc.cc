@@ -1,4 +1,4 @@
-/* Target Code for mrmr16
+/* Target Code for minirisc
    Copyright (C) 2008-2021 Free Software Foundation, Inc.
 
    This file is part of GCC.
@@ -47,7 +47,7 @@
 
 static int in_frame_build = 0;
 
-void mrmr16_split_symbolic_move (rtx, rtx);
+void minirisc_split_symbolic_move (rtx, rtx);
 
 /* Per-function machine data.  */
 struct GTY(()) machine_function
@@ -71,23 +71,23 @@ struct GTY(()) machine_function
 
 /* Zero initialization is OK for all current fields.  */
 static struct machine_function *
-mrmr16_init_machine_status (void)
+minirisc_init_machine_status (void)
 {
   return ggc_cleared_alloc<machine_function> ();
 }
 
 /* The TARGET_OPTION_OVERRIDE worker.  */
 static void
-mrmr16_option_override (void)
+minirisc_option_override (void)
 {
   /* Set the per-function-data initializer.  */
-  init_machine_status = mrmr16_init_machine_status;
+  init_machine_status = minirisc_init_machine_status;
 }
 
-static tree mrmr16_handle_type_attribute (tree *, tree, tree, int, bool *);
+static tree minirisc_handle_type_attribute (tree *, tree, tree, int, bool *);
 
 /* Defining target-specific uses of __attribute__.  */
-static const struct attribute_spec mrmr16_attribute_table[] =
+static const struct attribute_spec minirisc_attribute_table[] =
     {
         /* Syntax: { name, min_len, max_len, decl_required, type_required,
            function_type_required, affects_type_identity, handler,
@@ -95,7 +95,7 @@ static const struct attribute_spec mrmr16_attribute_table[] =
 
         /* This attribute generates prologue/epilogue for interrupt handlers.  */
         { "interrupt", 0, 1, false, true, true, false,
-          mrmr16_handle_type_attribute, NULL },
+          minirisc_handle_type_attribute, NULL },
 
         /* The last attribute spec is set to be NULL.  */
         { NULL,	0,  0, false, false, false, false, NULL, NULL }
@@ -105,7 +105,7 @@ static const struct attribute_spec mrmr16_attribute_table[] =
 /* Compute the size of the local area and the size to be adjusted by the
  * prologue and epilogue.  */
 static void
-mrmr16_compute_frame (void)
+minirisc_compute_frame (void)
 {
   /* For aligning the local variables.  */
   int stack_alignment = STACK_BOUNDARY / BITS_PER_UNIT;
@@ -137,7 +137,7 @@ mrmr16_compute_frame (void)
 }
 
 static void
-mrmr16_decrease_sp (rtx insn)
+minirisc_decrease_sp (rtx insn)
 {
   rtx num = gen_rtx_CONST_INT(QImode, 1);
   insn = emit_insn (gen_subqi3 (stack_pointer_rtx, stack_pointer_rtx, num));
@@ -146,43 +146,43 @@ mrmr16_decrease_sp (rtx insn)
 }
 
 static void
-mrmr16_increase_sp (rtx insn)
+minirisc_increase_sp (rtx insn)
 {
   rtx num = gen_rtx_CONST_INT(QImode, 1);
   insn = emit_insn (gen_addqi3 (stack_pointer_rtx, stack_pointer_rtx, num));
 }
 
 void
-mrmr16_push_emit (rtx reg_to_push_from, rtx insn = NULL)
+minirisc_push_emit (rtx reg_to_push_from, rtx insn = NULL)
 {
-  rtx reg_sp = gen_rtx_REG (QImode, MRMR16_SP);
+  rtx reg_sp = gen_rtx_REG (QImode, MINIRISC_SP);
   rtx dst = reg_sp;
   rtx src = reg_to_push_from;
 
-  mrmr16_decrease_sp (insn);
+  minirisc_decrease_sp (insn);
 
   insn = emit_move_insn (gen_rtx_MEM (QImode, reg_sp), reg_to_push_from);
 }
 
 void
-mrmr16_pop_emit (rtx reg_to_pop_to, rtx insn = NULL)
+minirisc_pop_emit (rtx reg_to_pop_to, rtx insn = NULL)
 {
-  rtx reg_sp = gen_rtx_REG (QImode, MRMR16_SP);
+  rtx reg_sp = gen_rtx_REG (QImode, MINIRISC_SP);
   rtx dst = reg_to_pop_to;
   rtx src = reg_sp;
 
   insn = emit_move_insn (reg_to_pop_to, gen_rtx_MEM (QImode, reg_sp));
 
-  mrmr16_increase_sp (insn);
+  minirisc_increase_sp (insn);
 }
 
 void
-mrmr16_expand_prologue (void)
+minirisc_expand_prologue (void)
 {
   int regno;
   rtx insn;
 
-  mrmr16_compute_frame ();
+  minirisc_compute_frame ();
 
   in_frame_build = 1;
   insn = emit_insn (gen_movqi_push (hard_frame_pointer_rtx));
@@ -210,7 +210,7 @@ mrmr16_expand_prologue (void)
       int i = cfun->machine->size_for_adjusting_sp;
       while ((i >= 255) && (i <= 510))
 	{
-          rtx reg = gen_rtx_REG (QImode, MRMR16_R7);
+          rtx reg = gen_rtx_REG (QImode, MINIRISC_R7);
           insn = emit_move_insn (reg, GEN_INT (255));
           RTX_FRAME_RELATED_P (insn) = 1;
 	  insn = emit_insn (gen_subqi3 (stack_pointer_rtx,
@@ -221,7 +221,7 @@ mrmr16_expand_prologue (void)
 	}
       if (i <= 255)
 	{
-          rtx reg = gen_rtx_REG (QImode, MRMR16_R7);
+          rtx reg = gen_rtx_REG (QImode, MINIRISC_R7);
           insn = emit_move_insn (reg, GEN_INT (i));
           RTX_FRAME_RELATED_P (insn) = 1;
 	  insn = emit_insn (gen_subqi3 (stack_pointer_rtx,
@@ -231,7 +231,7 @@ mrmr16_expand_prologue (void)
 	}
       else
 	{
-	  rtx reg = gen_rtx_REG (QImode, MRMR16_R7);
+	  rtx reg = gen_rtx_REG (QImode, MINIRISC_R7);
 	  insn = emit_move_insn (reg, GEN_INT (i));
 	  RTX_FRAME_RELATED_P (insn) = 1;
 	  insn = emit_insn (gen_subqi3 (stack_pointer_rtx,
@@ -243,7 +243,7 @@ mrmr16_expand_prologue (void)
 }
 
 void
-mrmr16_expand_epilogue (void)
+minirisc_expand_epilogue (void)
 {
   int regno;
   rtx reg;
@@ -254,7 +254,7 @@ mrmr16_expand_epilogue (void)
       int i = cfun->machine->size_for_adjusting_sp;
       while ((i >= 255) && (i <= 510))
       {
-          reg = gen_rtx_REG (QImode, MRMR16_R7);
+          reg = gen_rtx_REG (QImode, MINIRISC_R7);
           insn = emit_move_insn (reg, GEN_INT (255));
           RTX_FRAME_RELATED_P (insn) = 1;
 	  insn = emit_insn (gen_addqi3 (stack_pointer_rtx,
@@ -265,7 +265,7 @@ mrmr16_expand_epilogue (void)
       }
       if (i <= 255)
       {
-          reg = gen_rtx_REG (QImode, MRMR16_R7);
+          reg = gen_rtx_REG (QImode, MINIRISC_R7);
           insn = emit_move_insn (reg, GEN_INT (i));
           RTX_FRAME_RELATED_P (insn) = 1;
 	  insn = emit_insn (gen_addqi3 (stack_pointer_rtx,
@@ -275,7 +275,7 @@ mrmr16_expand_epilogue (void)
       }
       else
       {
-	  reg = gen_rtx_REG (QImode, MRMR16_R7);
+	  reg = gen_rtx_REG (QImode, MINIRISC_R7);
 	  insn = emit_move_insn (reg, GEN_INT (i));
 	  RTX_FRAME_RELATED_P (insn) = 1;
 	  insn = emit_insn (gen_addqi3 (stack_pointer_rtx,
@@ -287,7 +287,7 @@ mrmr16_expand_epilogue (void)
 
   if (cfun->machine->callee_saved_reg_size != 0)
     {
-      reg = gen_rtx_REG (Pmode, MRMR16_R7);
+      reg = gen_rtx_REG (Pmode, MINIRISC_R7);
       for (regno = FIRST_PSEUDO_REGISTER; regno-- > 0; )
 	if (!call_used_or_fixed_reg_p (regno)
 	    && df_regs_ever_live_p (regno))
@@ -298,7 +298,7 @@ mrmr16_expand_epilogue (void)
     }
 
   emit_move_insn (stack_pointer_rtx, hard_frame_pointer_rtx);
-  reg = gen_rtx_REG (Pmode, MRMR16_R7);
+  reg = gen_rtx_REG (Pmode, MINIRISC_R7);
   emit_insn (gen_movqi_pop (reg, hard_frame_pointer_rtx));
 
   if (cfun->machine->interrupt_handler_p)
@@ -309,14 +309,14 @@ mrmr16_expand_epilogue (void)
 
 /* Implements the macro INITIAL_ELIMINATION_OFFSET, return the OFFSET.  */
 int
-mrmr16_initial_elimination_offset (int from, int to)
+minirisc_initial_elimination_offset (int from, int to)
 {
   int ret;
 
   if ((from) == FRAME_POINTER_REGNUM && (to) == HARD_FRAME_POINTER_REGNUM)
     {
       /* Compute this since we need to use cfun->machine->local_vars_size.  */
-      mrmr16_compute_frame ();
+      minirisc_compute_frame ();
       ret = -cfun->machine->callee_saved_reg_size;
     }
   else if ((from) == ARG_POINTER_REGNUM && (to) == HARD_FRAME_POINTER_REGNUM)
@@ -333,7 +333,7 @@ mrmr16_initial_elimination_offset (int from, int to)
 
 /* Worker function for TARGET_RETURN_IN_MEMORY.  */
 static bool
-mrmr16_return_in_memory (const_tree type, const_tree fntype ATTRIBUTE_UNUSED)
+minirisc_return_in_memory (const_tree type, const_tree fntype ATTRIBUTE_UNUSED)
 {
   const HOST_WIDE_INT size = int_size_in_bytes (type);
   return (size == -1 || size > 1 * UNITS_PER_WORD);
@@ -342,7 +342,7 @@ mrmr16_return_in_memory (const_tree type, const_tree fntype ATTRIBUTE_UNUSED)
 /* Return non-zero if the function argument described by ARG is to be
    passed by reference.  */
 static bool
-mrmr16_pass_by_reference (cumulative_args_t, const function_arg_info &arg)
+minirisc_pass_by_reference (cumulative_args_t, const function_arg_info &arg)
 {
   if (arg.aggregate_type_p ())
     return true;
@@ -354,7 +354,7 @@ mrmr16_pass_by_reference (cumulative_args_t, const function_arg_info &arg)
    that hold arguments.  Given a new arg, return the number of bytes
    that fit in argument passing registers.  */
 static int
-mrmr16_arg_partial_bytes (cumulative_args_t cum_v, const function_arg_info &arg)
+minirisc_arg_partial_bytes (cumulative_args_t cum_v, const function_arg_info &arg)
 {
   return 0;
 }
@@ -362,31 +362,31 @@ mrmr16_arg_partial_bytes (cumulative_args_t cum_v, const function_arg_info &arg)
 /* Return the next register to be used to hold a function argument or
    NULL_RTX if there's no more space.  */
 static rtx
-mrmr16_function_arg (cumulative_args_t cum_v, const function_arg_info &arg)
+minirisc_function_arg (cumulative_args_t cum_v, const function_arg_info &arg)
 {
   return NULL_RTX;
 }
 
 static bool
-mrmr16_must_pass_in_stack (const function_arg_info &arg)
+minirisc_must_pass_in_stack (const function_arg_info &arg)
 {
   return true;
 }
 
-#define MRMR16_FUNCTION_ARG_SIZE(MODE, TYPE)	\
+#define MINIRISC_FUNCTION_ARG_SIZE(MODE, TYPE)	\
   ((MODE) != BLKmode ? GET_MODE_SIZE (MODE)	\
    : (unsigned) int_size_in_bytes (TYPE))
 
 static void
-mrmr16_function_arg_advance (cumulative_args_t cum_v,
+minirisc_function_arg_advance (cumulative_args_t cum_v,
                            const function_arg_info &arg)
 {
   return;
 }
 
-/* Helper function for `mrmr16_legitimate_address_p'.  */
+/* Helper function for `minirisc_legitimate_address_p'.  */
 static bool
-mrmr16_reg_ok_for_base_p (const_rtx reg, bool strict_p)
+minirisc_reg_ok_for_base_p (const_rtx reg, bool strict_p)
 {
   int regno = REGNO (reg);
 
@@ -400,7 +400,7 @@ mrmr16_reg_ok_for_base_p (const_rtx reg, bool strict_p)
 
 /* Worker function for TARGET_LEGITIMATE_ADDRESS_P.  */
 static bool
-mrmr16_legitimate_address_p (machine_mode mode ATTRIBUTE_UNUSED,
+minirisc_legitimate_address_p (machine_mode mode ATTRIBUTE_UNUSED,
                            rtx x, bool strict_p,
                            addr_space_t as)
 {
@@ -408,11 +408,11 @@ mrmr16_legitimate_address_p (machine_mode mode ATTRIBUTE_UNUSED,
 
   if (GET_CODE(x) == PLUS)
       /* && REG_P (XEXP (x, 0)) */
-      /* && mrmr16_reg_ok_for_base_p (XEXP (x, 0), strict_p) */
+      /* && minirisc_reg_ok_for_base_p (XEXP (x, 0), strict_p) */
       /* && CONST_INT_P (XEXP (x, 1)) */
       /* && IN_RANGE (INTVAL (XEXP (x, 1)), -32768, 32767)) */
     return false;
-  if (REG_P (x) && mrmr16_reg_ok_for_base_p (x, strict_p))
+  if (REG_P (x) && minirisc_reg_ok_for_base_p (x, strict_p))
     return true;
   if (GET_CODE (x) == SYMBOL_REF
       || GET_CODE (x) == LABEL_REF
@@ -423,7 +423,7 @@ mrmr16_legitimate_address_p (machine_mode mode ATTRIBUTE_UNUSED,
 
 /* Worker function for TARGET_SETUP_INCOMING_VARARGS.  */
 static void
-mrmr16_setup_incoming_varargs (cumulative_args_t cum_v,
+minirisc_setup_incoming_varargs (cumulative_args_t cum_v,
                              const function_arg_info &,
                              int *pretend_size, int no_rtl)
 {
@@ -449,7 +449,7 @@ mrmr16_setup_incoming_varargs (cumulative_args_t cum_v,
 
 /* Return the fixed registers used for condition codes.  */
 static bool
-mrmr16_fixed_condition_code_regs (unsigned int *p1, unsigned int *p2)
+minirisc_fixed_condition_code_regs (unsigned int *p1, unsigned int *p2)
 {
   *p1 = CC_REG;
   *p2 = INVALID_REGNUM;
@@ -460,35 +460,35 @@ mrmr16_fixed_condition_code_regs (unsigned int *p1, unsigned int *p2)
    VALTYPE is the data type of the value (as a tree).
    If the precise function being called is known, FUNC is its
    FUNCTION_DECL; otherwise, FUNC is 0.
-   We always return values in register 0 for mrmr16.  */
+   We always return values in register 0 for minirisc.  */
 static rtx
-mrmr16_function_value (const_tree valtype,
+minirisc_function_value (const_tree valtype,
                      const_tree fntype_or_decl ATTRIBUTE_UNUSED,
                      bool outgoing ATTRIBUTE_UNUSED)
 {
-  return gen_rtx_REG (TYPE_MODE (valtype), MRMR16_R0);
+  return gen_rtx_REG (TYPE_MODE (valtype), MINIRISC_R0);
 }
 
 /* Define how to find the value returned by a library function.
-   We always return values in register 0 for mrmr16.  */
+   We always return values in register 0 for minirisc.  */
 static rtx
-mrmr16_libcall_value (machine_mode mode,
+minirisc_libcall_value (machine_mode mode,
                     const_rtx fun ATTRIBUTE_UNUSED)
 {
-  return gen_rtx_REG (mode, MRMR16_R0);
+  return gen_rtx_REG (mode, MINIRISC_R0);
 }
 
 /* Handle TARGET_FUNCTION_VALUE_REGNO_P.
-   We always return values in register 0 for mrmr16.  */
+   We always return values in register 0 for minirisc.  */
 static bool
-mrmr16_function_value_regno_p (const unsigned int regno)
+minirisc_function_value_regno_p (const unsigned int regno)
 {
-  return (regno == MRMR16_R0);
+  return (regno == MINIRISC_R0);
 }
 
 /* Worker function for TARGET_STATIC_CHAIN.  */
 static rtx
-mrmr16_static_chain (const_tree ARG_UNUSED (fndecl_or_type), bool incoming_p)
+minirisc_static_chain (const_tree ARG_UNUSED (fndecl_or_type), bool incoming_p)
 {
   rtx addr, mem;
 
@@ -505,19 +505,19 @@ mrmr16_static_chain (const_tree ARG_UNUSED (fndecl_or_type), bool incoming_p)
 
 /* Return true for memory offset addresses between -32768 and 32767.  */
 bool
-mrmr16_offset_address_p (rtx x)
+minirisc_offset_address_p (rtx x)
 {
   return 0;
 }
 
 void
-mrmr16_split_symbolic_move (rtx dst, rtx src)
+minirisc_split_symbolic_move (rtx dst, rtx src)
 {
   if ((GET_CODE (dst) == MEM) &&
       ((GET_CODE (XEXP (dst, 0)) == SYMBOL_REF) ||
        (GET_CODE (XEXP (dst, 0)) == CONST)))
     {
-      rtx temp = gen_rtx_REG (QImode, MRMR16_R7);
+      rtx temp = gen_rtx_REG (QImode, MINIRISC_R7);
       emit_move_insn (temp, XEXP (dst, 0));
       emit_move_insn (gen_rtx_MEM (QImode, temp), src);
     }
@@ -536,7 +536,7 @@ mrmr16_split_symbolic_move (rtx dst, rtx src)
    FLAGS gives info about the context.  NO_ADD_ATTRS should be set to true if
    the attribute should be ignored.  */
 static tree
-mrmr16_handle_type_attribute (tree *node ATTRIBUTE_UNUSED, tree name, tree args,
+minirisc_handle_type_attribute (tree *node ATTRIBUTE_UNUSED, tree name, tree args,
                             int flags ATTRIBUTE_UNUSED, bool *no_add_attrs)
 {
   return NULL_TREE;
@@ -544,7 +544,7 @@ mrmr16_handle_type_attribute (tree *node ATTRIBUTE_UNUSED, tree name, tree args,
 
 /* Return true if function TYPE is an interrupt function.  */
 static bool
-mrmr16_interrupt_type_p (tree type)
+minirisc_interrupt_type_p (tree type)
 {
   return lookup_attribute ("interrupt", TYPE_ATTRIBUTES (type)) != NULL;
 }
@@ -552,7 +552,7 @@ mrmr16_interrupt_type_p (tree type)
 /* Implement `TARGET_SET_CURRENT_FUNCTION'.  */
 /* Sanity checking for function attributes.  */
 static void
-mrmr16_set_current_function (tree decl)
+minirisc_set_current_function (tree decl)
 {
   if (decl == NULL_TREE
       || current_function_decl == NULL_TREE
@@ -562,7 +562,7 @@ mrmr16_set_current_function (tree decl)
     return;
 
   cfun->machine->interrupt_handler_p
-    = mrmr16_interrupt_type_p (TREE_TYPE (decl));
+    = minirisc_interrupt_type_p (TREE_TYPE (decl));
 
   if (cfun->machine->interrupt_handler_p)
     {
@@ -583,7 +583,7 @@ mrmr16_set_current_function (tree decl)
 #define LOSE_AND_RETURN(msgid, x)		\
   do						\
     {						\
-      mrmr16_operand_lossage (msgid, x);          \
+      minirisc_operand_lossage (msgid, x);          \
       return;					\
     } while (0)
 
@@ -592,7 +592,7 @@ mrmr16_set_current_function (tree decl)
    use output_operand_lossage to output the actual message and handle the
    categorization of the error.  */
 static void
-mrmr16_operand_lossage (const char *msgid, rtx op)
+minirisc_operand_lossage (const char *msgid, rtx op)
 {
   debug_rtx (op);
   output_operand_lossage ("%s", msgid);
@@ -600,7 +600,7 @@ mrmr16_operand_lossage (const char *msgid, rtx op)
 
 /* The PRINT_OPERAND_ADDRESS worker.  */
 static void
-mrmr16_print_operand_address (FILE *file, machine_mode, rtx x)
+minirisc_print_operand_address (FILE *file, machine_mode, rtx x)
 {
   switch (GET_CODE (x))
     {
@@ -615,7 +615,7 @@ mrmr16_print_operand_address (FILE *file, machine_mode, rtx x)
 
 /* The PRINT_OPERAND worker.  */
 static void
-mrmr16_print_operand (FILE *file, rtx x, int code)
+minirisc_print_operand (FILE *file, rtx x, int code)
 {
   rtx operand = x;
 
@@ -639,7 +639,7 @@ mrmr16_print_operand (FILE *file, rtx x, int code)
   switch (GET_CODE (operand))
     {
     case REG:
-      if (REGNO (operand) > MRMR16_FP)
+      if (REGNO (operand) > MINIRISC_FP)
 	internal_error ("internal error: bad register: %d", REGNO (operand));
       fprintf (file, "%s", reg_names[REGNO (operand)]);
       return;
@@ -678,7 +678,7 @@ mrmr16_print_operand (FILE *file, rtx x, int code)
  ******************************************************************************/
 
 #undef  TARGET_OPTION_OVERRIDE
-#define TARGET_OPTION_OVERRIDE mrmr16_option_override
+#define TARGET_OPTION_OVERRIDE minirisc_option_override
 
 
 /******************************************************************************
@@ -696,7 +696,7 @@ mrmr16_print_operand (FILE *file, rtx x, int code)
 /* Frame Registers */
 
 #undef  TARGET_STATIC_CHAIN
-#define TARGET_STATIC_CHAIN mrmr16_static_chain
+#define TARGET_STATIC_CHAIN minirisc_static_chain
 
 /* Elimination */
 
@@ -711,29 +711,29 @@ mrmr16_print_operand (FILE *file, rtx x, int code)
 /* Register Arguments */
 
 #undef  TARGET_FUNCTION_ARG
-#define TARGET_FUNCTION_ARG         mrmr16_function_arg
+#define TARGET_FUNCTION_ARG         minirisc_function_arg
 #undef  TARGET_MUST_PASS_IN_STACK
-#define TARGET_MUST_PASS_IN_STACK   mrmr16_must_pass_in_stack
+#define TARGET_MUST_PASS_IN_STACK   minirisc_must_pass_in_stack
 #undef  TARGET_ARG_PARTIAL_BYTES
-#define TARGET_ARG_PARTIAL_BYTES    mrmr16_arg_partial_bytes
+#define TARGET_ARG_PARTIAL_BYTES    minirisc_arg_partial_bytes
 #undef  TARGET_PASS_BY_REFERENCE
-#define TARGET_PASS_BY_REFERENCE    mrmr16_pass_by_reference
+#define TARGET_PASS_BY_REFERENCE    minirisc_pass_by_reference
 #undef  TARGET_FUNCTION_ARG_ADVANCE
-#define TARGET_FUNCTION_ARG_ADVANCE mrmr16_function_arg_advance
+#define TARGET_FUNCTION_ARG_ADVANCE minirisc_function_arg_advance
 
 /* Scalar Return */
 
 #undef  TARGET_FUNCTION_VALUE
-#define TARGET_FUNCTION_VALUE         mrmr16_function_value
+#define TARGET_FUNCTION_VALUE         minirisc_function_value
 #undef  TARGET_LIBCALL_VALUE
-#define TARGET_LIBCALL_VALUE          mrmr16_libcall_value
+#define TARGET_LIBCALL_VALUE          minirisc_libcall_value
 #undef  TARGET_FUNCTION_VALUE_REGNO_P
-#define TARGET_FUNCTION_VALUE_REGNO_P mrmr16_function_value_regno_p
+#define TARGET_FUNCTION_VALUE_REGNO_P minirisc_function_value_regno_p
 
 /* Aggregate Return */
 
 #undef  TARGET_RETURN_IN_MEMORY
-#define TARGET_RETURN_IN_MEMORY mrmr16_return_in_memory
+#define TARGET_RETURN_IN_MEMORY minirisc_return_in_memory
 
 
 /******************************************************************************
@@ -741,7 +741,7 @@ mrmr16_print_operand (FILE *file, rtx x, int code)
  ******************************************************************************/
 
 #undef  TARGET_SETUP_INCOMING_VARARGS
-#define TARGET_SETUP_INCOMING_VARARGS mrmr16_setup_incoming_varargs
+#define TARGET_SETUP_INCOMING_VARARGS minirisc_setup_incoming_varargs
 
 
 /******************************************************************************
@@ -749,9 +749,9 @@ mrmr16_print_operand (FILE *file, rtx x, int code)
  ******************************************************************************/
 
 /* #undef  TARGET_LEGITIMATE_ADDRESS_P */
-/* #define TARGET_LEGITIMATE_ADDRESS_P mrmr16_legitimate_address_p */
+/* #define TARGET_LEGITIMATE_ADDRESS_P minirisc_legitimate_address_p */
 #undef  TARGET_ADDR_SPACE_LEGITIMATE_ADDRESS_P
-#define TARGET_ADDR_SPACE_LEGITIMATE_ADDRESS_P mrmr16_legitimate_address_p
+#define TARGET_ADDR_SPACE_LEGITIMATE_ADDRESS_P minirisc_legitimate_address_p
 
 
 
@@ -760,7 +760,7 @@ mrmr16_print_operand (FILE *file, rtx x, int code)
  ******************************************************************************/
 
 #undef	TARGET_FIXED_CONDITION_CODE_REGS
-#define	TARGET_FIXED_CONDITION_CODE_REGS mrmr16_fixed_condition_code_regs
+#define	TARGET_FIXED_CONDITION_CODE_REGS minirisc_fixed_condition_code_regs
 
 
 /******************************************************************************
@@ -768,9 +768,9 @@ mrmr16_print_operand (FILE *file, rtx x, int code)
  ******************************************************************************/
 
 #undef  TARGET_PRINT_OPERAND
-#define TARGET_PRINT_OPERAND mrmr16_print_operand
+#define TARGET_PRINT_OPERAND minirisc_print_operand
 #undef  TARGET_PRINT_OPERAND_ADDRESS
-#define TARGET_PRINT_OPERAND_ADDRESS mrmr16_print_operand_address
+#define TARGET_PRINT_OPERAND_ADDRESS minirisc_print_operand_address
 
 /* These are for printing type pseudo-ops, e.g. '.byte', '.short' etc. */
 /* #undef TARGET_ASM_BYTE_OP */
@@ -796,7 +796,7 @@ mrmr16_print_operand (FILE *file, rtx x, int code)
  ******************************************************************************/
 
 #undef TARGET_ATTRIBUTE_TABLE
-#define TARGET_ATTRIBUTE_TABLE mrmr16_attribute_table
+#define TARGET_ATTRIBUTE_TABLE minirisc_attribute_table
 
 
 /******************************************************************************
@@ -804,9 +804,9 @@ mrmr16_print_operand (FILE *file, rtx x, int code)
  ******************************************************************************/
 
 #undef  TARGET_SET_CURRENT_FUNCTION
-#define TARGET_SET_CURRENT_FUNCTION mrmr16_set_current_function
+#define TARGET_SET_CURRENT_FUNCTION minirisc_set_current_function
 
 
 struct gcc_target targetm = TARGET_INITIALIZER;
 
-#include "gt-mrmr16.h"
+#include "gt-minirisc.h"

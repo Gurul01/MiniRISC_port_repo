@@ -1063,7 +1063,7 @@ case "${target}" in
   moxie-*-*)
     noconfigdirs="$noconfigdirs"
     ;;
-  mrmr16-*-*)
+  minirisc-*-*)
    noconfigdirs="$noconfigdirs $target_tools $target_libraries"
     ;;
   h8300*-*-*)

@@ -1,4 +1,4 @@
-;; Constraint definitions for mrmr16
+;; Constraint definitions for minirisc
 ;; Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
 ;; This file is part of GCC.
@@ -35,7 +35,7 @@
 ;;(define_constraint "B"
 ;;  "An offset address."
 ;;  (and (match_code "mem")
-;;       (match_test "mrmr16_offset_address_p (op)")))
+;;       (match_test "minirisc_offset_address_p (op)")))
 
 (define_memory_constraint "W"
   "A register indirect memory operand."

@@ -1,4 +1,4 @@
-;; Machine description for mrmr16
+;; Machine description for minirisc
 ;; Copyright (C) 2009-2022 Free Software Foundation, Inc.
 
 ;; This file is part of GCC.
@@ -18,7 +18,7 @@
 ;; <http://www.gnu.org/licenses/>.
 
 ;; -------------------------------------------------------------------------
-;; mrmr16 specific constraints, predicates and attributes
+;; minirisc specific constraints, predicates and attributes
 ;; -------------------------------------------------------------------------
 
 (include "constraints.md")
@@ -52,7 +52,7 @@
     [(set (match_operand:QI 0 "register_operand" "=r,r")
 	  (plus:QI
 	   (match_operand:QI 1 "register_operand" "0,0")
-	   (match_operand:QI 2 "mrmr16_add_operand" "r,i")))]
+	   (match_operand:QI 2 "minirisc_add_operand" "r,i")))]
            ""
            "@
            ADD\\t%0 %2
@@ -63,7 +63,7 @@
     [(set (match_operand:QI 0 "register_operand" "=r,r")
 	  (minus:QI
 	   (match_operand:QI 1 "register_operand" "0,0")
-	   (match_operand:QI 2 "mrmr16_add_operand" "r,i")))]
+	   (match_operand:QI 2 "minirisc_add_operand" "r,i")))]
            ""
            "@
            SUB\\t%0 %2
@@ -110,7 +110,7 @@
 (define_insn "andqi3"
     [(set (match_operand:QI 0 "register_operand" "=r,r")
 	  (and:QI (match_operand:QI 1 "register_operand" "0,0")
-		  (match_operand:QI 2 "mrmr16_add_operand" "r,i")))]
+		  (match_operand:QI 2 "minirisc_add_operand" "r,i")))]
                   ""
                   "@
                   AND\\t%0 %2
@@ -120,7 +120,7 @@
 (define_insn "xorqi3"
     [(set (match_operand:QI 0 "register_operand" "=r,r")
 	  (xor:QI (match_operand:QI 1 "register_operand" "0,0")
-		  (match_operand:QI 2 "mrmr16_add_operand" "r,i")))]
+		  (match_operand:QI 2 "minirisc_add_operand" "r,i")))]
                   ""
                   "@
                   XOR\\t%0 %2
@@ -130,7 +130,7 @@
 (define_insn "iorqi3"
     [(set (match_operand:QI 0 "register_operand" "=r,r")
 	  (ior:QI (match_operand:QI 1 "register_operand" "0,0")
-		  (match_operand:QI 2 "mrmr16_add_operand" "r,i")))]
+		  (match_operand:QI 2 "minirisc_add_operand" "r,i")))]
                   ""
                   "@
                   OR\\t%0 %2
@@ -143,7 +143,7 @@
 ;; -------------------------------------------------------------------------
 
 ;; We don't add SP as an operand that is going to be changed by the operation as we always call the
-;; mrmr16_decrease_sp() or the mrmr16_decrease_sp() in the prologe/epiloge before the push/pop defined here.
+;; minirisc_decrease_sp() or the minirisc_decrease_sp() in the prologe/epiloge before the push/pop defined here.
 
 (define_expand "movqi_push"
     [(set (mem:QI (reg:QI 1))
@@ -151,7 +151,7 @@
     ""
     {
       rtx insn;
-      mrmr16_push_emit (operands[0], insn);
+      minirisc_push_emit (operands[0], insn);
       DONE;
     })
 
@@ -161,19 +161,19 @@
     ""
     {
       rtx insn;
-      mrmr16_pop_emit (operands[1], insn);
+      minirisc_pop_emit (operands[1], insn);
       DONE;
     })
 
 (define_expand "movqi"
     [(set (match_operand:QI 0 "" "")
-	  (match_operand:QI 1 "mrmr16_general_movsrc_operand" ""))]
+	  (match_operand:QI 1 "minirisc_general_movsrc_operand" ""))]
 	  ""
 	  "")
 
 (define_insn "movqi_internal"
     [(set (match_operand:QI 0 "" "=r,r,r,r,r,W,A")
-          (match_operand:QI 1 "mrmr16_general_movsrc_operand" "r,i,Y,W,A,r,r"))]
+          (match_operand:QI 1 "minirisc_general_movsrc_operand" "r,i,Y,W,A,r,r"))]
           ""
           "@
           MOV\\t%0 %1
@@ -188,7 +188,7 @@
 
 ;;(define_split
 ;;    [(set (match_operand:QI 0 "nonimmediate_operand" "")
-;;	  (match_operand:QI 1 "mrmr16_general_movsrc_operand" ""))]
+;;	  (match_operand:QI 1 "minirisc_general_movsrc_operand" ""))]
 ;;	  "
 ;;          ((GET_CODE (operands[0]) == MEM) && (GET_CODE (XEXP (operands[0], 0)) == SYMBOL_REF)) ||
 ;;          ((GET_CODE (operands[1]) == MEM) && (GET_CODE (XEXP (operands[1], 0)) == SYMBOL_REF)) ||
@@ -197,7 +197,7 @@
 ;;          "
 ;;	  [(const_int 0)]
 ;;	  {
-;;	    mrmr16_split_symbolic_move (operands[0], operands[1]);
+;;	    minirisc_split_symbolic_move (operands[0], operands[1]);
 ;;	    DONE;
 ;;	  })
 
@@ -298,7 +298,7 @@
     ""
     "
 {
-  mrmr16_expand_prologue ();
+  minirisc_expand_prologue ();
   DONE;
 }
 ")
@@ -308,7 +308,7 @@
     ""
     "
 {
-  mrmr16_expand_epilogue ();
+  minirisc_expand_epilogue ();
   DONE;
 }
 ")

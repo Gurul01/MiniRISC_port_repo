@@ -1,4 +1,4 @@
-;; Predicate definitions for mrmr16
+;; Predicate definitions for minirisc
 ;; Copyright (C) 2009-2022 Free Software Foundation, Inc.
 
 ;; This file is part of GCC.
@@ -22,7 +22,7 @@
 ;; -------------------------------------------------------------------------
 
 ;; Nonzero if OP can be source of a simple move operation.
-(define_predicate "mrmr16_general_movsrc_operand"
+(define_predicate "minirisc_general_movsrc_operand"
   (match_code "mem,const_int,reg,subreg,symbol_ref,const")
 {
   /* Any (MEM LABEL_REF) is OK.  That is a pc-relative load.  */
@@ -40,23 +40,23 @@
 })
 
 ;; Nonzero if OP can be an operand to an add/inc/dec instruction.
-(define_predicate "mrmr16_add_operand"
+(define_predicate "minirisc_add_operand"
   (ior (match_code "reg")
        (and (match_code "const_int")
 	    (match_test "IN_RANGE (INTVAL (op), -255, 255)"))))
 
 ;; Nonzero if OP can be an operand to an sub/dec instruction.
-(define_predicate "mrmr16_sub_operand"
+(define_predicate "minirisc_sub_operand"
   (ior (match_code "reg")
        (and (match_code "const_int")
 	    (match_test "IN_RANGE (INTVAL (op), 0, 255)"))))
 
-(define_predicate "mrmr16_add_sub_inc_dec_operand"
+(define_predicate "minirisc_add_sub_inc_dec_operand"
     (ior (match_code "reg")
 	 (and (match_code "const_int")
 	      (match_test "INTVAL (op) == 1"))))
 
-(define_predicate "mrmr16_comparison_operator"
+(define_predicate "minirisc_comparison_operator"
     (match_code "eq"))
 
 ;; Local Variables:

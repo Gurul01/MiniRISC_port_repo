@@ -391,8 +391,8 @@ ft32*)	cpu_type=ft32
 moxie*)	cpu_type=moxie
 	target_has_targetm_common=no
 	;;
-mrmr16-*-*)
-	cpu_type=mrmr16
+minirisc-*-*)
+	cpu_type=minirisc
 	target_has_targetm_common=no
 	;;
 fido-*-*)
@@ -1756,7 +1756,7 @@ moxie-*-moxiebox*)
 	tm_file="${tm_file} elfos.h moxie/moxiebox.h newlib-stdint.h"
 	tmake_file="${tmake_file} moxie/t-moxiebox"
 	;;
-mrmr16-*-*)
+minirisc-*-*)
 	gas=yes
 	gnu_ld=yes
 	;;
