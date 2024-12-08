@@ -72,12 +72,6 @@ static int minirisc_parse_register(const char *name, expressionS *resultP)
 }
 
 
-static int minirisc_parse_sym_add(const char *name, expressionS *resultP)
-{
-    return 0;
-}
-
-
 /*************************************************************/
 /*   If non of the others is true then we have a symbol      */
 /*     (we assume)                                           */
@@ -410,9 +404,6 @@ int minirisc_parse_name(const char *name, expressionS *resultP, char *next_char)
     if(minirisc_parse_opcode(name, resultP, next_char) != 0)
         return 1;
 
-    if(minirisc_parse_sym_add(name, resultP) != 0)
-        return 1;
-    
     if(minirisc_parse_symbol(name, resultP) != 0)
         return 1;
 
@@ -823,7 +814,7 @@ const char *md_atof(int type, char *lit, int *size)
 valueT md_section_align(asection *seg, valueT size)
 {
     // Get the section alignment as a power of 2
-    int align = seg->alignment_power;// - 1;
+    int align = seg->alignment_power;
 
     // Calculate the new size, rounded up to the nearest alignment boundary
     valueT new_size = ((size + (1 << align) - 1) & ~((1 << align) - 1));
@@ -861,7 +852,6 @@ void md_apply_fix(fixS *fixp, valueT *val, segT seg)
 arelent *tc_gen_reloc(asection *seg, fixS *fixp)
 {
     arelent *reloc;
-    //symbolS *sym;
 
     //gas_assert(fixp != 0);
 
@@ -869,47 +859,8 @@ arelent *tc_gen_reloc(asection *seg, fixS *fixp)
     reloc->sym_ptr_ptr = XNEW(asymbol*);
     *reloc->sym_ptr_ptr = symbol_get_bfdsym(fixp->fx_addsy);
 
-    // segT sec;
-    // expressionS *exp;
-    // symbolS *sym;
-
-    // sym = fixp->fx_addsy;
-    // sec = S_GET_SEGMENT(sym);
-    // exp = symbol_get_value_expression(sym);
-
-    
-    
-
     reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
     reloc->howto = bfd_reloc_type_lookup(stdoutput, fixp->fx_r_type);
-
-    // if(exp->X_op = O_symbol)
-    // {
-    //      printf("ArrivedXXX_1\n");
-    //      printf("add_num = %d\n", exp->X_add_number);
-    //      printf("fx_offset = %d\n", fixp->fx_offset);
-    //     asymbol *asymp = symbol_get_bfdsym(sym);
-    //     if(asymp->flags & BSF_GLOBAL)
-    //     {
-    //              printf("ArrivedXXX_3\n");
-    //              printf("add_num = %d\n", exp->X_add_number);
-    //              printf("fx_offset = %d\n", fixp->fx_offset);
-
-    //             if(fixp->fx_offset != 0)
-    //             {
-    //                 reloc->addend = ~((int64_t)exp->X_add_number - (int64_t)fixp->fx_offset) + 1; //fixp->fx_offset - exp->X_add_number;
-    //                 if(reloc->addend == 0)
-    //                 {
-    //                     //If the addend is zero then the whole value will be zero in the obj file
-    //                     //This only the case when we try to relocate global symbols in the assembly pahse if it contains a symbol relative offset...
-    //                     // Or somthing like that
-    //                     return NULL;
-    //                 }
-    //                 return reloc;
-    //             }
-    //     }
-    // }
-    
     reloc->addend = fixp->fx_offset;
     
     return reloc;

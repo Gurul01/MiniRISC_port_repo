@@ -40,7 +40,7 @@ static bfd_reloc_status_type minirisc_elf_relative_reloc(bfd *abfd,
 static reloc_howto_type minirisc_elf_howto_table[] =
 {
     HOWTO (R_MINIRISC_NONE,      // type                            
-        0,//1,                       // rightshift   
+        0,                       // rightshift   
         1,                       // size(0 = byte, 1 = short, 2 = long)
         8,                       // bitsize   
         false,                   // pc_relative       
@@ -54,9 +54,10 @@ static reloc_howto_type minirisc_elf_howto_table[] =
         false),                  // pcrel_offset        
 
     HOWTO (R_MINIRISC_8,             // type                            
-        0,//1,                           // rightshift   
+        0,                           // rightshift   
         1,                           // size(0 = byte, 1 = short, 2 = long)
-        11,//8,                           // bitsize    
+        //The reason why this next one is not 8 is to prevent going out of reloc range in case of linking
+        11,                          // bitsize    
         false,                       // pc_relative           
         0,                           // bitpos   
         complain_overflow_bitfield,  // complain_on_overflow                                        
@@ -68,7 +69,7 @@ static reloc_howto_type minirisc_elf_howto_table[] =
         false),                      // pcrel_offset             
 
     HOWTO (R_MINIRISC_RELATIVE,     // type                              
-        0,//1,                          // rightshift   
+        0,                          // rightshift   
         1,                          // size(0 = byte, 1 = short, 2 = long)
         8,                          // bitsize    
         true,                       // pc_relative          

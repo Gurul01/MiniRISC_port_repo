@@ -46,7 +46,6 @@ compilation is specified by a string called a "spec".  */
 #include "spellcheck.h"
 #include "opts-jobserver.h"
 #include "common/common-target.h"
-//#include "/home/orsned01/MiniRISC_port/gcc/source/gcc/config/mrmr16/linker_script.cc"
 
 
 
@@ -59,7 +58,6 @@ compilation is specified by a string called a "spec".  */
    and
      getenv ();
    Hence we need to use "get" for the accessor method, not "getenv".  */
-
 
 struct env_manager
 {

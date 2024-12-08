@@ -1092,10 +1092,6 @@ moxie-*-elf | moxie-*-moxiebox* | moxie-*-uclinux* | moxie-*-rtems*)
 	tmake_file="$tmake_file moxie/t-moxie t-softfp-sfdf t-softfp-excl t-softfp"
 	extra_parts="$extra_parts crti.o crtn.o crtbegin.o crtend.o"
 	;;
-mrmr16*)
-	tmake_file="$tmake_file moxie/t-moxie"
-	extra_parts="$extra_parts crti.o crtn.o crtbegin.o crtend.o"
-	;;
 msp430-*-elf*)
 	tmake_file="$tm_file t-crtstuff t-fdpbit msp430/t-msp430"
 	extra_parts="crtbegin.o crtend.o crtbegin_no_eh.o crtend_no_eh.o"
