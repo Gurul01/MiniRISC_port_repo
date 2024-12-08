@@ -1603,10 +1603,6 @@ bpf-*-*)
         extra_objs="coreout.o"
         target_gtfiles="$target_gtfiles \$(srcdir)/config/bpf/coreout.cc"
         ;;
-minirisc*-*-linux*)
-	tm_file="${tm_file} elfos.h gnu-user.h linux.h glibc-stdint.h"
-	tmake_file="${tmake_file} minirisc/t-minirisc"
-	;;
 cris-*-elf | cris-*-none)
 	tm_file="elfos.h newlib-stdint.h ${tm_file}"
 	tmake_file="cris/t-cris cris/t-elfmulti"
