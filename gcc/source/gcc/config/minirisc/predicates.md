@@ -25,8 +25,6 @@
 (define_predicate "minirisc_general_movsrc_operand"
   (match_code "mem,const_int,reg,subreg,symbol_ref,const")
 {
-  /* Any (MEM LABEL_REF) is OK.  That is a pc-relative load.  */
-
   if (MEM_P (op) && GET_CODE (XEXP (op, 0)) == SYMBOL_REF)
     return 1;
 
