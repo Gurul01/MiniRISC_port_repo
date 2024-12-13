@@ -102,7 +102,7 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
     expressionS *first_operand;
     expressionS *second_operand;
    
-    //gas_assert(name != 0 && resultP != 0);
+    gas_assert(name != 0 && resultP != 0);
 
     if( 0 == strcmp(name, "LOAD") || 0 == strcmp(name, "load"))
     {
@@ -396,7 +396,7 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
 /*************************************************************/
 int minirisc_parse_name(const char *name, expressionS *resultP, char *next_char)
 {
-    //gas_assert(name != 0 && resultP != 0);
+    gas_assert(name != 0 && resultP != 0);
 
     if(minirisc_parse_register(name, resultP) != 0)
         return 1;
@@ -448,7 +448,7 @@ void md_begin(void)
 
 static void minirisc_emit_insn(minirisc_slot_insn *insn, expressionS *whole_instr)
 {
-    //gas_assert(insn != 0);
+    gas_assert(insn != 0);
 
     uint16_t e_insn = 0;
     char *frag = frag_more(MINIRISC_BYTES_SLOT_INSTRUCTION);
@@ -633,7 +633,7 @@ void md_assemble(char *insn_str)
         case OR:  if(whole_instr->X_op == OR)  { opcode = OP_OR;  }
         case XOR: if(whole_instr->X_op == XOR) { opcode = OP_XOR; }
         case TST: if(whole_instr->X_op == TST) { opcode = OP_TST; }
-            //gas_assert((whole_instr->X_add_symbol != 0) && (whole_instr->X_op_symbol != 0));
+            gas_assert((whole_instr->X_add_symbol != 0) && (whole_instr->X_op_symbol != 0));
 
             first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
             second_op = symbol_get_value_expression(whole_instr->X_op_symbol);
@@ -666,7 +666,7 @@ void md_assemble(char *insn_str)
 
     /* Only one reg as operand --------------------------------------------------------*/
         case SWP:
-            //gas_assert(whole_instr->X_add_symbol != 0);
+            gas_assert(whole_instr->X_add_symbol != 0);
 
             first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
 
@@ -693,7 +693,7 @@ void md_assemble(char *insn_str)
         case ROR: if(whole_instr->X_op == ROR) { ctrl_field = ROR_CTRL; }
         case RLC: if(whole_instr->X_op == RLC) { ctrl_field = RLC_CTRL; }
         case RRC: if(whole_instr->X_op == RRC) { ctrl_field = RRC_CTRL; }
-            //gas_assert(whole_instr->X_add_symbol != 0);
+            gas_assert(whole_instr->X_add_symbol != 0);
 
             first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
 
@@ -729,7 +729,7 @@ void md_assemble(char *insn_str)
         case JSE: if(whole_instr->X_op == JSE) { ctrl_field = JSE_CTRL; }
         case JG:  if(whole_instr->X_op == JG)  { ctrl_field = JG_CTRL;  }
         case JSR: if(whole_instr->X_op == JSR) { ctrl_field = JSR_CTRL; }
-             //gas_assert(whole_instr->X_add_symbol != 0);
+             gas_assert(whole_instr->X_add_symbol != 0);
 
             first_op = symbol_get_value_expression(whole_instr->X_add_symbol);
 
@@ -853,7 +853,7 @@ arelent *tc_gen_reloc(asection *seg, fixS *fixp)
 {
     arelent *reloc;
 
-    //gas_assert(fixp != 0);
+    gas_assert(fixp != 0);
 
     reloc = XNEW(arelent);
     reloc->sym_ptr_ptr = XNEW(asymbol*);

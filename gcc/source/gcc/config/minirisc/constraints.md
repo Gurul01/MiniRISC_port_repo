@@ -27,11 +27,6 @@
        (ior (match_test "GET_CODE (XEXP (op, 0)) == SYMBOL_REF")
 	    (match_test "GET_CODE (XEXP (op, 0)) == CONST"))))
 
-(define_constraint "Y"
-    "An absolute address."
-  (ior (match_code "symbol_ref")
-       (match_code "const")))
-
 ;;(define_constraint "B"
 ;;  "An offset address."
 ;;  (and (match_code "mem")
@@ -59,9 +54,9 @@
        (match_test "ival >= 0 && ival <= 255")))
 
 (define_constraint "N"
-  "A constant -(0..255)"
+  "A constant -(0..128)"
   (and (match_code "const_int")
-       (match_test "ival >= -255 && ival <= 0")))
+       (match_test "ival >= -128 && ival <= 0")))
 
 ;; Local Variables:
 ;; mode: lisp

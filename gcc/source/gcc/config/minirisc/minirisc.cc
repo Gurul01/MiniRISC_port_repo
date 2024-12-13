@@ -45,10 +45,6 @@
 /* This file should be included last.  */
 #include "target-def.h"
 
-static int in_frame_build = 0;
-
-void minirisc_split_symbolic_move (rtx, rtx);
-
 /* Per-function machine data.  */
 struct GTY(()) machine_function
 {
@@ -141,8 +137,7 @@ minirisc_decrease_sp (rtx insn)
 {
   rtx num = gen_rtx_CONST_INT(QImode, 1);
   insn = emit_insn (gen_subqi3 (stack_pointer_rtx, stack_pointer_rtx, num));
-  if(in_frame_build == 1)
-	  RTX_FRAME_RELATED_P (insn) = 1;
+	RTX_FRAME_RELATED_P (insn) = 1;
 }
 
 static void
@@ -184,9 +179,7 @@ minirisc_expand_prologue (void)
 
   minirisc_compute_frame ();
 
-  in_frame_build = 1;
-  insn = emit_insn (gen_movqi_push (hard_frame_pointer_rtx));
-  in_frame_build = 0;
+  minirisc_push_emit(hard_frame_pointer_rtx, insn);
   insn = emit_move_insn (hard_frame_pointer_rtx, stack_pointer_rtx);
   RTX_FRAME_RELATED_P (insn) = 1;
 
@@ -199,9 +192,7 @@ minirisc_expand_prologue (void)
       if (df_regs_ever_live_p (regno)
 	  && !call_used_or_fixed_reg_p (regno))
 	{
-    in_frame_build = 1;
-	  insn = emit_insn (gen_movqi_push (gen_rtx_REG (Pmode, regno)));
-    in_frame_build = 0;
+    minirisc_push_emit(gen_rtx_REG (Pmode, regno), insn);
 	}
     }
 
@@ -287,19 +278,18 @@ minirisc_expand_epilogue (void)
 
   if (cfun->machine->callee_saved_reg_size != 0)
     {
-      reg = gen_rtx_REG (Pmode, MINIRISC_R7);
       for (regno = FIRST_PSEUDO_REGISTER; regno-- > 0; )
 	if (!call_used_or_fixed_reg_p (regno)
 	    && df_regs_ever_live_p (regno))
 	  {
 	    rtx preg = gen_rtx_REG (Pmode, regno);
-	    emit_insn (gen_movqi_pop (reg, preg));
+	    minirisc_pop_emit(preg, insn);
 	  }
     }
 
   emit_move_insn (stack_pointer_rtx, hard_frame_pointer_rtx);
   reg = gen_rtx_REG (Pmode, MINIRISC_R7);
-  emit_insn (gen_movqi_pop (reg, hard_frame_pointer_rtx));
+  minirisc_pop_emit(hard_frame_pointer_rtx, insn);
 
   if (cfun->machine->interrupt_handler_p)
     emit_jump_insn (gen_iret ());

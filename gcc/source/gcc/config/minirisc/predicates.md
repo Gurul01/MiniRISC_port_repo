@@ -39,17 +39,17 @@
   return general_operand (op, mode);
 })
 
-;; Nonzero if OP can be an operand to an add/inc/dec instruction.
-(define_predicate "minirisc_add_operand"
-  (ior (match_code "reg")
-       (and (match_code "const_int")
-	    (match_test "IN_RANGE (INTVAL (op), -255, 255)"))))
-
-;; Nonzero if OP can be an operand to an sub/dec instruction.
-(define_predicate "minirisc_sub_operand"
+;; Nonzero if OP can be an operand to an add/sub instruction.
+(define_predicate "minirisc_add_sub_operand"
   (ior (match_code "reg")
        (and (match_code "const_int")
 	    (match_test "IN_RANGE (INTVAL (op), 0, 255)"))))
+
+;; Nonzero if OP can be an operand to a minirisc_logic_operand instruction.
+(define_predicate "minirisc_logic_operand"
+  (ior (match_code "reg")
+       (and (match_code "const_int")
+	    (match_test "IN_RANGE (INTVAL (op), -128, 255)"))))
 
 (define_predicate "minirisc_add_sub_inc_dec_operand"
     (ior (match_code "reg")

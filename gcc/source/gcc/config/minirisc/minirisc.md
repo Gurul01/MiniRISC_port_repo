@@ -28,13 +28,6 @@
 (define_attr "length" "" (const_int 1))
 
 
-
-
-;; CONSTANT
-(define_constants
-  [(CC_REG 11)])
-
-
 ;; -------------------------------------------------------------------------
 ;; nop instruction
 ;; -------------------------------------------------------------------------
@@ -48,11 +41,33 @@
 ;; Arithmetic instructions
 ;; -------------------------------------------------------------------------
 
-(define_insn "addqi3"
+(define_expand "addqi3"
+    [(match_operand:QI 0 "register_operand" "")
+	   (match_operand:QI 1 "register_operand" "")
+	   (match_operand:QI 2 "general_operand" "")]
+          ""
+          "
+          {
+            rtx pos_num;
+
+            if(INTVAL(operands[2]) < 0)
+            {
+              pos_num = gen_rtx_CONST_INT(QImode, (-1) * INTVAL(operands[2]));
+              emit_insn(gen_subqi3(operands[0], operands[1], pos_num));
+            }
+            else
+            {
+              emit_insn(gen_addqi3_internal(operands[0], operands[1], operands[2]));
+            }
+            DONE;
+          }
+          ")
+
+(define_insn "addqi3_internal"
     [(set (match_operand:QI 0 "register_operand" "=r,r")
 	  (plus:QI
 	   (match_operand:QI 1 "register_operand" "0,0")
-	   (match_operand:QI 2 "minirisc_add_operand" "r,i")))]
+	   (match_operand:QI 2 "minirisc_add_sub_operand" "r,i")))]
            ""
            "@
            ADD\\t%0 %2
@@ -63,7 +78,7 @@
     [(set (match_operand:QI 0 "register_operand" "=r,r")
 	  (minus:QI
 	   (match_operand:QI 1 "register_operand" "0,0")
-	   (match_operand:QI 2 "minirisc_add_operand" "r,i")))]
+	   (match_operand:QI 2 "minirisc_add_sub_operand" "r,i")))]
            ""
            "@
            SUB\\t%0 %2
@@ -110,7 +125,7 @@
 (define_insn "andqi3"
     [(set (match_operand:QI 0 "register_operand" "=r,r")
 	  (and:QI (match_operand:QI 1 "register_operand" "0,0")
-		  (match_operand:QI 2 "minirisc_add_operand" "r,i")))]
+		  (match_operand:QI 2 "minirisc_logic_operand" "r,i")))]
                   ""
                   "@
                   AND\\t%0 %2
@@ -120,7 +135,7 @@
 (define_insn "xorqi3"
     [(set (match_operand:QI 0 "register_operand" "=r,r")
 	  (xor:QI (match_operand:QI 1 "register_operand" "0,0")
-		  (match_operand:QI 2 "minirisc_add_operand" "r,i")))]
+		  (match_operand:QI 2 "minirisc_logic_operand" "r,i")))]
                   ""
                   "@
                   XOR\\t%0 %2
@@ -130,7 +145,7 @@
 (define_insn "iorqi3"
     [(set (match_operand:QI 0 "register_operand" "=r,r")
 	  (ior:QI (match_operand:QI 1 "register_operand" "0,0")
-		  (match_operand:QI 2 "minirisc_add_operand" "r,i")))]
+		  (match_operand:QI 2 "minirisc_logic_operand" "r,i")))]
                   ""
                   "@
                   OR\\t%0 %2
@@ -145,26 +160,6 @@
 ;; We don't add SP as an operand that is going to be changed by the operation as we always call the
 ;; minirisc_decrease_sp() or the minirisc_decrease_sp() in the prologe/epiloge before the push/pop defined here.
 
-(define_expand "movqi_push"
-    [(set (mem:QI (reg:QI 1))
-  	  (match_operand:QI 0 "register_operand" "r"))]
-    ""
-    {
-      rtx insn;
-      minirisc_push_emit (operands[0], insn);
-      DONE;
-    })
-
-(define_expand "movqi_pop"
-    [(set (match_operand:QI 1 "register_operand" "=r")
-  	  (mem:QI (match_operand:QI 0 "register_operand" "r")))]
-    ""
-    {
-      rtx insn;
-      minirisc_pop_emit (operands[1], insn);
-      DONE;
-    })
-
 (define_expand "movqi"
     [(set (match_operand:QI 0 "" "")
 	  (match_operand:QI 1 "minirisc_general_movsrc_operand" ""))]
@@ -172,11 +167,10 @@
 	  "")
 
 (define_insn "movqi_internal"
-    [(set (match_operand:QI 0 "" "=r,r,r,r,r,W,A")
-          (match_operand:QI 1 "minirisc_general_movsrc_operand" "r,i,Y,W,A,r,r"))]
+    [(set (match_operand:QI 0 "nonimmediate_operand" "=r,r,r,r,W,A")
+          (match_operand:QI 1 "minirisc_general_movsrc_operand" "r,i,W,A,r,r"))]
           ""
           "@
-          MOV\\t%0 %1
           MOV\\t%0 %1
           MOV\\t%0 %1
           LOAD\\t%0 %1
@@ -184,22 +178,6 @@
           STORE\\t%0 %1
           STORE\\t%0 %1"
           [])
-
-
-;;(define_split
-;;    [(set (match_operand:QI 0 "nonimmediate_operand" "")
-;;	  (match_operand:QI 1 "minirisc_general_movsrc_operand" ""))]
-;;	  "
-;;          ((GET_CODE (operands[0]) == MEM) && (GET_CODE (XEXP (operands[0], 0)) == SYMBOL_REF)) ||
-;;          ((GET_CODE (operands[1]) == MEM) && (GET_CODE (XEXP (operands[1], 0)) == SYMBOL_REF)) ||
-;;          ((GET_CODE (operands[0]) == MEM) && (GET_CODE (XEXP (operands[0], 0)) == CONST)) ||
-;;          ((GET_CODE (operands[1]) == MEM) && (GET_CODE (XEXP (operands[1], 0)) == CONST))
-;;          "
-;;	  [(const_int 0)]
-;;	  {
-;;	    minirisc_split_symbolic_move (operands[0], operands[1]);
-;;	    DONE;
-;;	  })
 
 
 ;; -------------------------------------------------------------------------
@@ -239,12 +217,12 @@
 ;; -------------------------------------------------------------------------
 
 (define_constants
-  [(CC_REG 11)])
+  [(CC_REG 17)])
 
 (define_expand "cbranchqi4"
   [(set (reg:CC CC_REG)
         (compare:CC
-         (match_operand:QI 1 "general_operand" "")
+         (match_operand:QI 1 "register_operand" "")
          (match_operand:QI 2 "general_operand" "")))
    (set (pc)
         (if_then_else (match_operator 0 "comparison_operator"
@@ -252,19 +230,13 @@
                       (label_ref (match_operand 3 "" ""))
                       (pc)))]
   ""
-  "
-  /* Force the compare operands into registers.  */
-  if (GET_CODE (operands[1]) != REG)
-	operands[1] = force_reg (QImode, operands[1]);
-  if (GET_CODE (operands[2]) != REG)
-	operands[2] = force_reg (QImode, operands[2]);
-  ")
+  "")
 
 (define_insn "*cmpqi"
   [(set (reg:CC CC_REG)
 	(compare
-	 (match_operand:QI 0 "register_operand" "r")
-	 (match_operand:QI 1 "register_operand"	"r")))]
+	 (match_operand:QI 0 "register_operand" "r,r")
+	 (match_operand:QI 1 "general_operand"	"r,i")))]
   ""
   "CMP\\t%0 %1")
 
