@@ -31,9 +31,6 @@
   if (MEM_P (op) && GET_CODE (XEXP (op, 0)) == REG)
     return 1;
 
-  if (MEM_P (op) && GET_CODE (XEXP (op, 0)) == PLUS)
-    return 0;
-
   return general_operand (op, mode);
 })
 
