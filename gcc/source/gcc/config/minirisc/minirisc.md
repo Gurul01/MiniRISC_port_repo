@@ -157,16 +157,7 @@
 ;; Move instructions
 ;; -------------------------------------------------------------------------
 
-;; We don't add SP as an operand that is going to be changed by the operation as we always call the
-;; minirisc_decrease_sp() or the minirisc_decrease_sp() in the prologe/epiloge before the push/pop defined here.
-
-(define_expand "movqi"
-    [(set (match_operand:QI 0 "" "")
-	  (match_operand:QI 1 "minirisc_general_movsrc_operand" ""))]
-	  ""
-	  "")
-
-(define_insn "movqi_internal"
+(define_insn "movqi"
     [(set (match_operand:QI 0 "nonimmediate_operand" "=r,r,r,r,W,A")
           (match_operand:QI 1 "minirisc_general_movsrc_operand" "r,i,W,A,r,r"))]
           ""
