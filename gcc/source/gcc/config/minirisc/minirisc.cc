@@ -147,24 +147,20 @@ minirisc_increase_sp (rtx insn)
   insn = emit_insn (gen_addqi3 (stack_pointer_rtx, stack_pointer_rtx, num));
 }
 
-void
+static void
 minirisc_push_emit (rtx reg_to_push_from, rtx insn = NULL)
 {
   rtx reg_sp = gen_rtx_REG (QImode, MINIRISC_SP);
-  rtx dst = reg_sp;
-  rtx src = reg_to_push_from;
 
   minirisc_decrease_sp (insn);
 
   insn = emit_move_insn (gen_rtx_MEM (QImode, reg_sp), reg_to_push_from);
 }
 
-void
+static void
 minirisc_pop_emit (rtx reg_to_pop_to, rtx insn = NULL)
 {
   rtx reg_sp = gen_rtx_REG (QImode, MINIRISC_SP);
-  rtx dst = reg_to_pop_to;
-  rtx src = reg_sp;
 
   insn = emit_move_insn (reg_to_pop_to, gen_rtx_MEM (QImode, reg_sp));
 

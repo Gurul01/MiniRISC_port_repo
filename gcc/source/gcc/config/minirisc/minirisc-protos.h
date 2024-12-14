@@ -22,5 +22,3 @@ extern void  minirisc_expand_epilogue (void);
 extern int   minirisc_initial_elimination_offset (int, int);
 extern bool  minirisc_offset_address_p (rtx);
 extern void  minirisc_split_symbolic_move (rtx, rtx);
-extern void  minirisc_push_emit (rtx, rtx);
-extern void  minirisc_pop_emit (rtx, rtx);
