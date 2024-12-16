@@ -125,43 +125,46 @@
 #define MINIRISC_R4   4
 #define MINIRISC_R5   5
 #define MINIRISC_R6   6
-#define MINIRISC_R7   7 //prologue/epilogue
+#define MINIRISC_R7   7 
 #define MINIRISC_R8   8
-#define MINIRISC_R9   9
+#define MINIRISC_R9   9 //prologue/epilogue
 #define MINIRISC_R10  10
 #define MINIRISC_R11  11
+#define MINIRISC_R12  12
+#define MINIRISC_R13  13
 
-#define MINIRISC_SP  12 //sp...
-#define MINIRISC_FP  13
+#define MINIRISC_SP  14 //sp...
+#define MINIRISC_FP  15
 
-#define MINIRISC_QFP 14
-#define MINIRISC_QAP 15
+// Virtual registers
+#define MINIRISC_QFP 16
+#define MINIRISC_QAP 17
 
 // Not accessable from assebly
-#define MINIRISC_PC  16
-#define MINIRISC_CC  17
+#define MINIRISC_PC  18
+#define MINIRISC_CC  19
 
-#define FIRST_PSEUDO_REGISTER 18
+#define FIRST_PSEUDO_REGISTER 20
 
-#define FIXED_REGISTERS                                     \
-{                                                           \
-    /* го-г11=>0; r12-r17=>1 */                             \
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1    \
+#define FIXED_REGISTERS                                           \
+{                                                                 \
+    /* го-г13=>0; r14-r19=>1 */                                   \
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1    \
 }
 
-#define CALL_USED_REGISTERS                                 \
-{                                                           \
-    /* го-г7=>0; r7-r17=>1 */                               \
-    0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1    \
+#define CALL_USED_REGISTERS                                       \
+{                                                                 \
+    /* r0=>0; г1-г8=>1; r9-r13=>0; r14-r19=>1 */                  \
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1    \
 }
 
-#define REG_ALLOC_ORDER                                                              \
-{                                                                                    \
-    1, 2, 3, 4, 5, 6,                /* caller saved registers */                    \
-    8, 9, 10, 11,                    /* callee saved registers */                    \
-    0,                               /* return value/address register */             \
-    7,                               /* used in prologue/epilogue construction */    \
-    12, 13, 14, 15, 16, 17           /* fp, sp, (PC, CC) */                          \
+#define REG_ALLOC_ORDER                                                             \
+{                                                                                   \
+    1, 2, 3, 4, 5, 6, 7, 8          /* caller saved registers */                    \
+    10, 11, 12, 13,                 /* callee saved registers */                    \
+    0,                              /* return value register */                     \
+    9,                              /* used in prologue/epilogue construction */    \
+    14, 15, 16, 17, 18, 19          /* fp, sp, (QFP, QAP, PC, CC) */                \
 }
 // 4, 3, 2, 1,                      /* argument registers */                        \
 
@@ -196,10 +199,10 @@ enum reg_class
 
 #define REG_CLASS_CONTENTS                         \
 { { 0x00000000 }, /* Empty */			               \
-  { 0x00007FFF }, /* R0 to R5, SP, FP, QFP */      \
-  { 0x00010000 }, /* PC */	                        \
-  { 0x00020000 }, /* CC */                         \
-  { 0x0003FFFF }  /* All registers */              \
+  { 0x0001FFFF }, /* R0 to R13, SP, FP, QFP */     \
+  { 0x00040000 }, /* PC */	                        \
+  { 0x00080000 }, /* CC */                         \
+  { 0x000FFFFF }  /* All registers */              \
 }
 
 /* A C expression whose value is a register class containing hard
@@ -408,9 +411,9 @@ enum reg_class
 
 /* Instruction Output */
 
-#define REGISTER_NAMES                                                                                   \
-{                                                                                                        \
-    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "sp", "fp", "?fp", "?ap", "pc", "?cc" \
+#define REGISTER_NAMES                                                                                                            \
+{                                                                                                                                 \
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12", "r13", "sp", "fp", "?fp", "?ap", "pc", "?cc" \
 }
 
 /* Alignment Output */

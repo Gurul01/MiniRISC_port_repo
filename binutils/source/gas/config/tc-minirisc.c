@@ -83,7 +83,6 @@ static int minirisc_parse_symbol(const char *name, expressionS *resultP)
     know(sym != 0);
 
     exp = symbol_get_value_expression(sym);
-    //exp->X_add_number /= 2;
 
     resultP->X_op = O_symbol;
     resultP->X_add_symbol = sym;
@@ -91,7 +90,7 @@ static int minirisc_parse_symbol(const char *name, expressionS *resultP)
     /* A hack to avoid 'make_expr_symbol' turn the node into 'O_constant' */
     resultP->X_add_number = 1;
 
-     printf("Reached_parse_symbol: %s\n", name);
+    printf("Symbol: %s\n", name);
     return 1;
 }
 
@@ -299,7 +298,6 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
         case XOR:
         case TST:
             (void) restore_line_pointer(*next_char);
-            //input_line_pointer = next_char;
 
             SKIP_ALL_WHITESPACE();
             first_operand = (expressionS*)malloc(sizeof(expressionS));
@@ -316,12 +314,7 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
             // Dummy
             resultP->X_add_number = 1;
 
-            // while(*input_line_pointer != '\n')
-            // {
-            //     input_line_pointer++;
-            // }
-            // input_line_pointer++;
-            *next_char = *input_line_pointer; //next_char = input_line_pointer;
+            *next_char = *input_line_pointer;
             break;
 
         // The instructions with one operand
@@ -352,7 +345,6 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
         case JG: 
         case JSR:
             (void) restore_line_pointer(*next_char);
-            //input_line_pointer = next_char;
 
             SKIP_ALL_WHITESPACE();
             first_operand = (expressionS*)malloc(sizeof(expressionS));
@@ -361,15 +353,9 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
             resultP->X_add_symbol = make_expr_symbol(first_operand);
 
             // Dummy
-            //resultP->X_op_symbol  = 0;
             resultP->X_add_number = 1;
 
-            // while(*input_line_pointer != '\n')
-            // {
-            //     input_line_pointer++;
-            // }   
-            // input_line_pointer++;
-            *next_char = *input_line_pointer; //next_char = input_line_pointer;
+            *next_char = *input_line_pointer;
             break;
 
         // The instructions with zero operands
@@ -378,8 +364,6 @@ static int minirisc_parse_opcode(const char *name, expressionS *resultP, char *n
         case STI:
         case CLI:
             // Dummy
-            //resultP->X_add_symbol = 0;
-            //resultP->X_op_symbol  = 0;
             resultP->X_add_number = 1;
 
             break;
@@ -421,21 +405,13 @@ void md_begin(void)
     {
         reg_array[i].number = i;
 
-        if(i == 12)
+        if(i == 14)
         {
             sprintf(reg_array[i].name, "sp");
         }
-        else if(i == 13)
-        {
-            sprintf(reg_array[i].name, "fp");
-        }
-        else if(i == 14)
-        {
-            sprintf(reg_array[i].name, "?fp");
-        }
         else if(i == 15)
         {
-            sprintf(reg_array[i].name, "?ap");
+            sprintf(reg_array[i].name, "fp");
         }
         else
         {
