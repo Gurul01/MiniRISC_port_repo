@@ -462,7 +462,7 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-  minirisc-*-linux*)
+  minirisc-*)
     targ_defvec=minirisc_elf32_vec
     targ_selvecs=minirisc_elf32_vec
     ;;
