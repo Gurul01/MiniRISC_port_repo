@@ -36,7 +36,7 @@ def convert_bin_to_data_mem(input_data):
     # Generate the output in the specified format
     output_lines = []
     for index, data_byte in enumerate(data_memory):
-        output_lines.append(f"data_mem[{index}] = 8'b{data_byte};")
+        output_lines.append(f"{data_byte}")
 
     return "\n".join(output_lines)
 

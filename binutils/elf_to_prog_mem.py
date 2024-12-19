@@ -38,7 +38,7 @@ def convert_hex_to_prg_mem(input_data):
     # Generate the output in the specified format
     output_lines = []
     for index, instruction in enumerate(instructions):
-        output_lines.append(f"prg_mem[{index}] = 16'b{instruction};")
+        output_lines.append(f"{instruction}")
 
     return "\n".join(output_lines)
 
