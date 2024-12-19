@@ -197,7 +197,7 @@ minirisc_expand_prologue (void)
       int i = cfun->machine->size_for_adjusting_sp;
       while ((i >= 255) && (i <= 510))
 	{
-          rtx reg = gen_rtx_REG (QImode, MINIRISC_R7);
+          rtx reg = gen_rtx_REG (QImode, MINIRISC_R9);
           insn = emit_move_insn (reg, GEN_INT (255));
           RTX_FRAME_RELATED_P (insn) = 1;
 	  insn = emit_insn (gen_subqi3 (stack_pointer_rtx,
@@ -208,7 +208,7 @@ minirisc_expand_prologue (void)
 	}
       if (i <= 255)
 	{
-          rtx reg = gen_rtx_REG (QImode, MINIRISC_R7);
+          rtx reg = gen_rtx_REG (QImode, MINIRISC_R9);
           insn = emit_move_insn (reg, GEN_INT (i));
           RTX_FRAME_RELATED_P (insn) = 1;
 	  insn = emit_insn (gen_subqi3 (stack_pointer_rtx,
@@ -218,7 +218,7 @@ minirisc_expand_prologue (void)
 	}
       else
 	{
-	  rtx reg = gen_rtx_REG (QImode, MINIRISC_R7);
+	  rtx reg = gen_rtx_REG (QImode, MINIRISC_R9);
 	  insn = emit_move_insn (reg, GEN_INT (i));
 	  RTX_FRAME_RELATED_P (insn) = 1;
 	  insn = emit_insn (gen_subqi3 (stack_pointer_rtx,
@@ -241,7 +241,7 @@ minirisc_expand_epilogue (void)
       int i = cfun->machine->size_for_adjusting_sp;
       while ((i >= 255) && (i <= 510))
       {
-          reg = gen_rtx_REG (QImode, MINIRISC_R7);
+          reg = gen_rtx_REG (QImode, MINIRISC_R9);
           insn = emit_move_insn (reg, GEN_INT (255));
           RTX_FRAME_RELATED_P (insn) = 1;
 	  insn = emit_insn (gen_addqi3 (stack_pointer_rtx,
@@ -252,7 +252,7 @@ minirisc_expand_epilogue (void)
       }
       if (i <= 255)
       {
-          reg = gen_rtx_REG (QImode, MINIRISC_R7);
+          reg = gen_rtx_REG (QImode, MINIRISC_R9);
           insn = emit_move_insn (reg, GEN_INT (i));
           RTX_FRAME_RELATED_P (insn) = 1;
 	  insn = emit_insn (gen_addqi3 (stack_pointer_rtx,
@@ -262,7 +262,7 @@ minirisc_expand_epilogue (void)
       }
       else
       {
-	  reg = gen_rtx_REG (QImode, MINIRISC_R7);
+	  reg = gen_rtx_REG (QImode, MINIRISC_R9);
 	  insn = emit_move_insn (reg, GEN_INT (i));
 	  RTX_FRAME_RELATED_P (insn) = 1;
 	  insn = emit_insn (gen_addqi3 (stack_pointer_rtx,
@@ -284,7 +284,7 @@ minirisc_expand_epilogue (void)
     }
 
   emit_move_insn (stack_pointer_rtx, hard_frame_pointer_rtx);
-  reg = gen_rtx_REG (Pmode, MINIRISC_R7);
+  reg = gen_rtx_REG (Pmode, MINIRISC_R9);
   minirisc_pop_emit(hard_frame_pointer_rtx, insn);
 
   if (cfun->machine->interrupt_handler_p)
@@ -503,7 +503,7 @@ minirisc_split_symbolic_move (rtx dst, rtx src)
       ((GET_CODE (XEXP (dst, 0)) == SYMBOL_REF) ||
        (GET_CODE (XEXP (dst, 0)) == CONST)))
     {
-      rtx temp = gen_rtx_REG (QImode, MINIRISC_R7);
+      rtx temp = gen_rtx_REG (QImode, MINIRISC_R9);
       emit_move_insn (temp, XEXP (dst, 0));
       emit_move_insn (gen_rtx_MEM (QImode, temp), src);
     }

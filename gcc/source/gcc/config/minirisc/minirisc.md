@@ -208,7 +208,7 @@
 ;; -------------------------------------------------------------------------
 
 (define_constants
-  [(CC_REG 17)])
+  [(CC_REG 19)])
 
 (define_expand "cbranchqi4"
   [(set (reg:CC CC_REG)

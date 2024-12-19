@@ -160,7 +160,7 @@
 
 #define REG_ALLOC_ORDER                                                             \
 {                                                                                   \
-    1, 2, 3, 4, 5, 6, 7, 8          /* caller saved registers */                    \
+    1, 2, 3, 4, 5, 6, 7, 8,          /* caller saved registers */                    \
     10, 11, 12, 13,                 /* callee saved registers */                    \
     0,                              /* return value register */                     \
     9,                              /* used in prologue/epilogue construction */    \
@@ -342,7 +342,7 @@ enum reg_class
 /* Define this macro as a C expression that is nonzero for registers that are
    used by the epilogue or the return pattern.  The stack and frame
    pointer registers are already assumed to be used as needed.  */
-#define EPILOGUE_USES(R) (R == MINIRISC_R7)
+#define EPILOGUE_USES(R) (R == MINIRISC_R9)
 
 /* Profiling */
 
